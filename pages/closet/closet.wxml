@@ -1,0 +1,59 @@
+<view class="container closet-page" data-theme="{{__theme}}">
+  <view class="safe-top px-4 pb-2" style="padding-top: 44px;">
+    <text class="text-heading">我的衣柜</text>
+  </view>
+
+  <!-- Stats Bar -->
+  <view class="card stats-bar mx-4 mt-2">
+    <view class="stat-col">
+      <text class="text-stat">{{totalWardrobes}}</text>
+      <text class="text-stat-label mt-1">个衣柜</text>
+    </view>
+    <view class="divider"></view>
+    <view class="stat-col">
+      <text class="text-stat">{{totalItems}}</text>
+      <text class="text-stat-label mt-1">件衣物</text>
+    </view>
+    <view class="divider"></view>
+    <view class="stat-col">
+      <text class="text-stat">{{totalZones}}</text>
+      <text class="text-stat-label mt-1">个分区</text>
+    </view>
+  </view>
+
+  <!-- Add Button -->
+  <view class="mx-4 mt-4">
+    <view class="add-btn" bindtap="showAdd">
+      <text style="color: var(--accent); font-size: 18px; margin-right: 6px;">+</text>
+      <text class="text-body" style="color: var(--accent); font-weight: 500;">添加衣柜</text>
+    </view>
+  </view>
+
+  <!-- Wardrobe List -->
+  <view class="mx-4 mt-4">
+    <view wx:for="{{wardrobes}}" wx:key="id" class="card wardrobe-item mb-3" bindtap="goToDetail" data-id="{{item.id}}">
+      <view class="icon-box">
+        <image src="/images/layout-grid.png" class="icon-box-img" />
+      </view>
+      <view class="flex-1 min-w-0">
+        <text class="text-body font-medium block truncate">{{item.name}}</text>
+        <text class="text-caption block">{{item.description}}</text>
+        <text class="text-caption block" style="color: var(--text-muted);">{{item.zoneCount}}个分区 · {{item.itemCount}}件衣物</text>
+      </view>
+      <image src="/images/chevron-right.png" class="wardrobe-arrow" />
+    </view>
+  </view>
+
+  <!-- Add Dialog -->
+  <view wx:if="{{showAddDialog}}" class="overlay flex items-center justify-center px-6" catchtouchmove="prevent">
+    <view class="dialog-box w-full">
+      <text class="text-heading mb-4 block">添加衣柜</text>
+      <input class="form-input mb-3" value="{{newName}}" bindinput="onNameInput" placeholder="衣柜名称" />
+      <input class="form-input mb-3" value="{{newDesc}}" bindinput="onDescInput" placeholder="描述（可选）" />
+      <view class="flex gap-2">
+        <button class="btn-sm btn-cancel flex-1" bindtap="hideAdd">取消</button>
+        <button class="btn-sm btn-confirm flex-1" bindtap="confirmAdd">确认</button>
+      </view>
+    </view>
+  </view>
+</view>

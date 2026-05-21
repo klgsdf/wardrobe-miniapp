@@ -1,0 +1,63 @@
+<view class="tab-bar-wrap" data-theme="{{__theme}}">
+  <!-- 顶部渐变分界线 -->
+  <view class="tab-bar-divider"></view>
+
+  <!-- 玻璃拟态背景层 -->
+  <view class="tab-bar-glass"></view>
+
+  <!-- 导航内容 -->
+  <view class="tab-bar-content" style="padding-bottom: {{safeAreaBottom}}px;">
+    <!-- 左侧导航组 -->
+    <view class="tab-bar-group">
+      <view
+        wx:for="{{navItems}}"
+        wx:key="index"
+        wx:if="{{index < 2}}"
+        class="tab-bar-item {{activeIndex === index ? 'tab-bar-item-active' : ''}}"
+        data-index="{{index}}"
+        bindtap="switchTab"
+      >
+        <view class="tab-bar-icon-wrap">
+          <image
+            class="tab-bar-icon"
+            src="{{activeIndex === index ? item.iconActive : item.icon}}"
+            mode="aspectFit"
+          />
+        </view>
+        <text class="tab-bar-text {{activeIndex === index ? 'tab-bar-text-active' : ''}}">{{item.text}}</text>
+        <!-- 激活指示点 -->
+        <view wx:if="{{activeIndex === index}}" class="tab-bar-indicator"></view>
+      </view>
+    </view>
+
+    <!-- 中央 ADD 按钮 -->
+    <view class="tab-bar-add-wrap">
+      <view class="tab-bar-add-btn" bindtap="onAddTap">
+        <text class="tab-bar-add-icon">+</text>
+      </view>
+    </view>
+
+    <!-- 右侧导航组 -->
+    <view class="tab-bar-group">
+      <view
+        wx:for="{{navItems}}"
+        wx:key="index"
+        wx:if="{{index >= 2}}"
+        class="tab-bar-item {{activeIndex === index ? 'tab-bar-item-active' : ''}}"
+        data-index="{{index}}"
+        bindtap="switchTab"
+      >
+        <view class="tab-bar-icon-wrap">
+          <image
+            class="tab-bar-icon"
+            src="{{activeIndex === index ? item.iconActive : item.icon}}"
+            mode="aspectFit"
+          />
+        </view>
+        <text class="tab-bar-text {{activeIndex === index ? 'tab-bar-text-active' : ''}}">{{item.text}}</text>
+        <!-- 激活指示点 -->
+        <view wx:if="{{activeIndex === index}}" class="tab-bar-indicator"></view>
+      </view>
+    </view>
+  </view>
+</view>

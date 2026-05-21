@@ -1,0 +1,253 @@
+<view class="container add-page" data-theme="{{__theme}}">
+  <!-- Header -->
+  <view class="safe-header">
+    <view class="header-inner">
+      <view bindtap="cancel" class="back-btn">
+        <image src="/images/icon-back.png" class="back-icon" />
+      </view>
+      <text class="header-title">添加单品</text>
+      <view class="header-placeholder"></view>
+    </view>
+  </view>
+
+  <scroll-view scroll-y class="form-scroll" style="height: calc(100vh - 94px - 90px); margin-top: 4px;">
+    <!-- Photo Upload Row -->
+    <view class="photo-row">
+      <view bindtap="chooseImage" class="photo-box {{image ? 'photo-box-has-image' : ''}}">
+        <image wx:if="{{image}}" class="photo-image" src="{{image}}" mode="aspectFill" />
+        <view wx:else class="photo-placeholder">
+          <view class="photo-icon-wrap">
+            <image src="/images/shirt.png" class="photo-icon" />
+          </view>
+          <text class="photo-text">拍照</text>
+        </view>
+      </view>
+      <view bindtap="chooseImage" class="photo-box photo-box-album {{image ? 'photo-box-has-image' : ''}}">
+        <image wx:if="{{image}}" class="photo-image" src="{{image}}" mode="aspectFill" />
+        <view wx:else class="photo-placeholder">
+          <view class="photo-icon-wrap">
+            <text class="album-icon">↑</text>
+          </view>
+          <text class="photo-text">相册</text>
+        </view>
+      </view>
+      <view wx:if="{{image}}" bindtap="aiRecognize" class="ai-btn">
+        <image src="/images/sparkles.png" class="ai-btn-icon" />
+        <text class="ai-btn-text">智能识别</text>
+      </view>
+    </view>
+
+    <!-- Name -->
+    <view class="field-group">
+      <text class="field-label">名称</text>
+      <input class="form-input inset-input" value="{{name}}" bindinput="onNameInput" placeholder="给衣物起个名字" placeholder-class="input-placeholder" />
+    </view>
+
+    <!-- Category Dropdown -->
+    <view class="field-group">
+      <text class="field-label">种类</text>
+      <view bindtap="showCategoryPicker" class="dropdown-trigger">
+        <text class="dropdown-text {{category ? 'dropdown-text-active' : ''}}">{{category ? category + (subCategory ? ' > ' + subCategory : '') : '选择种类'}}</text>
+        <image src="/images/chevron-down.png" class="dropdown-arrow" />
+      </view>
+    </view>
+
+    <!-- Sub-category (shown inline when category selected) -->
+    <view class="field-group" wx:if="{{category}}">
+      <view class="subcat-header">
+        <text class="field-label">细分类别</text>
+        <text class="subcat-hint">{{category}}细分</text>
+      </view>
+      <view class="tag-grid">
+        <view wx:for="{{subCategoryList}}" wx:key="*this" bindtap="selectSubCategory" data-sub="{{item}}" class="tag-pill {{subCategory === item ? 'tag-pill-active' : ''}}">{{item}}</view>
+      </view>
+    </view>
+
+    <!-- Color Ribbon -->
+    <view class="field-group">
+      <text class="field-label">颜色</text>
+      <view class="color-ribbon-card">
+        <view class="color-ribbon-row">
+          <view wx:for="{{colorRibbon}}" wx:key="color" bindtap="toggleColor" data-c="{{item.color}}" class="color-ribbon-item {{item.active ? 'color-ribbon-active' : ''}}">
+            <view class="color-ribbon-dot" style="background: {{item.color}}; {{item.color === '#FFFFFF' ? 'border: 1px solid var(--border);' : ''}}"></view>
+          </view>
+        </view>
+        <view class="color-ribbon-row color-ribbon-row-second">
+          <view wx:for="{{colorRibbonSecond}}" wx:key="color" bindtap="toggleColor" data-c="{{item.color}}" class="color-ribbon-item {{item.active ? 'color-ribbon-active' : ''}}">
+            <view class="color-ribbon-dot" style="background: {{item.color}};"></view>
+          </view>
+        </view>
+      </view>
+      <text class="color-selected-text" wx:if="{{selectedColorNames}}">已选：{{selectedColorNames}}</text>
+    </view>
+
+    <!-- Season Dropdown -->
+    <view class="field-group">
+      <text class="field-label">季节</text>
+      <view bindtap="showSeasonPicker" class="dropdown-trigger">
+        <text class="dropdown-text {{seasons.length ? 'dropdown-text-active' : ''}}">{{seasons.length ? seasonText : '选择季节'}}</text>
+        <image src="/images/chevron-down.png" class="dropdown-arrow" />
+      </view>
+    </view>
+
+    <!-- Style Dropdown -->
+    <view class="field-group">
+      <text class="field-label">风格</text>
+      <view bindtap="showStylePicker" class="dropdown-trigger">
+        <text class="dropdown-text {{style ? 'dropdown-text-active' : ''}}">{{style || '选择风格'}}</text>
+        <image src="/images/chevron-down.png" class="dropdown-arrow" />
+      </view>
+    </view>
+
+    <!-- Notes -->
+    <view class="field-group">
+      <text class="field-label">备注（选填）</text>
+      <textarea class="form-textarea inset-input" value="{{notes}}" bindinput="onNotesInput" placeholder="添加一些备注信息..." placeholder-class="input-placeholder" maxlength="200" />
+    </view>
+
+    <!-- Bottom spacing -->
+    <view style="height: 40px;"></view>
+  </scroll-view>
+
+  <!-- Fixed Bottom Confirm Button -->
+  <view class="bottom-bar">
+    <button class="btn-confirm-full" bindtap="onConfirmTap">确认添加</button>
+  </view>
+
+  <!-- ===== Category Picker Modal ===== -->
+  <view wx:if="{{showCategoryPicker}}" class="modal-overlay" bindtap="hideCategoryPicker">
+    <view class="modal-sheet modal-center" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">选择种类</text>
+        <view bindtap="hideCategoryPicker" class="modal-close">
+          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="category-grid">
+          <view wx:for="{{categoryList}}" wx:key="name" bindtap="selectCategory" data-cat="{{item.name}}" class="category-card {{category === item.name ? 'category-card-active' : ''}}">
+            <text class="category-card-icon">{{item.icon}}</text>
+            <text class="category-card-name">{{item.name}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== Season Picker Modal ===== -->
+  <view wx:if="{{showSeasonPicker}}" class="modal-overlay" bindtap="hideSeasonPicker">
+    <view class="modal-sheet modal-center" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">选择季节</text>
+        <view bindtap="hideSeasonPicker" class="modal-close">
+          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="season-grid">
+          <view wx:for="{{seasonCards}}" wx:key="name" bindtap="toggleSeason" data-s="{{item.name}}" class="season-card {{item.active ? 'season-card-active' : ''}}">
+            <text class="season-card-name">{{item.name}}</text>
+          </view>
+        </view>
+        <view class="modal-footer-hint">可多选</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== Style Picker Modal ===== -->
+  <view wx:if="{{showStylePicker}}" class="modal-overlay" bindtap="hideStylePicker">
+    <view class="modal-sheet modal-center" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">选择风格</text>
+        <view bindtap="hideStylePicker" class="modal-close">
+          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+        </view>
+      </view>
+      <view class="modal-body">
+        <view class="style-grid">
+          <view wx:for="{{styleOptions}}" wx:key="*this" bindtap="selectStyle" data-s="{{item}}" class="style-card {{style === item ? 'style-card-active' : ''}}">
+            <text class="style-card-name">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== Wardrobe & Zone Selection Modal (after confirm) ===== -->
+  <view wx:if="{{showWardrobeModal}}" class="modal-overlay">
+    <view class="modal-sheet modal-center" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">选择存放位置</text>
+        <view bindtap="hideWardrobeModal" class="modal-close">
+          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+        </view>
+      </view>
+      <view class="modal-body">
+        <!-- Step 1: Select Wardrobe -->
+        <view wx:if="{{wardrobeStep === 'wardrobe'}}">
+          <text class="modal-section-label">选择衣柜</text>
+          <view class="wardrobe-list">
+            <view wx:for="{{wardrobes}}" wx:key="id" bindtap="selectWardrobe" data-id="{{item.id}}" class="wardrobe-card {{wardrobeId === item.id ? 'wardrobe-card-active' : ''}}">
+              <view class="wardrobe-card-info">
+                <text class="wardrobe-card-name">{{item.name}}</text>
+                <text class="wardrobe-card-desc">{{item.zoneCount}}个分区 · {{item.description}}</text>
+              </view>
+              <view wx:if="{{wardrobeId === item.id}}" class="wardrobe-card-check">✓</view>
+            </view>
+          </view>
+        </view>
+        <!-- Step 2: Select Zone -->
+        <view wx:if="{{wardrobeStep === 'zone'}}">
+          <view class="modal-back-row" bindtap="backToWardrobe">
+            <image src="/images/chevron-down.png" class="modal-back-icon" style="transform: rotate(90deg);" />
+            <text class="modal-back-text">{{selectedWardrobeName}}</text>
+          </view>
+          <text class="modal-section-label">选择分区</text>
+          <view class="zone-list">
+            <view wx:for="{{zones}}" wx:key="id" bindtap="selectZone" data-id="{{item.id}}" class="zone-card {{zoneId === item.id ? 'zone-card-active' : ''}}">
+              <view class="zone-card-info">
+                <text class="zone-card-name">{{item.name}}</text>
+                <text class="zone-card-type">{{item.type}}</text>
+              </view>
+              <view wx:if="{{zoneId === item.id}}" class="zone-card-check">✓</view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-footer" wx:if="{{wardrobeStep === 'zone'}}">
+        <button class="btn-confirm-full btn-confirm-modal" bindtap="finalSubmit">确认存放</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI Recognition Overlay -->
+  <view wx:if="{{showAiOverlay}}" class="ai-overlay">
+    <view class="ai-radial-glow"></view>
+    <view class="ai-scan-area">
+      <view class="ai-scan-image-box">
+        <image wx:if="{{image}}" src="{{image}}" mode="aspectFill" style="width:100%;height:100%;" />
+        <view class="ai-grid-overlay"></view>
+      </view>
+      <view class="ai-bracket ai-bracket-tl"></view>
+      <view class="ai-bracket ai-bracket-tr"></view>
+      <view class="ai-bracket ai-bracket-bl"></view>
+      <view class="ai-bracket ai-bracket-br"></view>
+      <view wx:if="{{aiStatus === 'scanning'}}" class="ai-scan-line"></view>
+    </view>
+    <view wx:if="{{aiStatus === 'scanning'}}" class="ai-rec-tags">
+      <view class="ai-rec-tag" style="animation-delay:0.6s;">类别: {{aiResult.category || '识别中...'}}</view>
+      <view class="ai-rec-tag" style="animation-delay:1.2s;">颜色: {{aiResult.color || '识别中...'}}</view>
+      <view class="ai-rec-tag" style="animation-delay:1.8s;">风格: {{aiResult.style || '识别中...'}}</view>
+    </view>
+    <view wx:if="{{aiStatus === 'success'}}" style="text-align:center;margin-bottom:12px;">
+      <view class="ai-success-circle">
+        <text class="ai-success-check">✓</text>
+      </view>
+      <text class="ai-success-text">识别成功</text>
+    </view>
+    <text wx:if="{{aiStatus === 'scanning'}}" class="ai-status-text">AI正在识别衣物...</text>
+    <view wx:if="{{aiStatus === 'scanning'}}" class="ai-spinner-box">
+      <text class="ai-spinner-text">AI</text>
+    </view>
+  </view>
+</view>

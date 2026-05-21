@@ -1,0 +1,138 @@
+<view class="dd-page container" data-theme="{{__theme}}">
+  <!-- Header -->
+  <view class="safe-header">
+    <view class="dd-header">
+      <view class="dd-back-btn" bindtap="goBack">
+        <image src="/images/icon-back.png" class="dd-back-icon" />
+      </view>
+      <text class="dd-title">穿搭详情</text>
+      <view class="dd-share-btn" bindtap="shareEntry">
+        <image src="/images/chevron-right.png" class="dd-share-icon" style="transform: rotate(-45deg);" />
+      </view>
+    </view>
+  </view>
+
+  <!-- Scrollable Content -->
+  <scroll-view class="dd-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- Photo -->
+    <view class="dd-photo-card" wx:if="{{entry.photos && entry.photos.length > 0}}">
+      <image class="dd-photo-img" src="{{entry.photos[0]}}" mode="aspectFill" />
+    </view>
+
+    <!-- Info Card -->
+    <view class="dd-info-card">
+      <view class="dd-info-row">
+        <text class="dd-name">{{entry.name}}</text>
+        <view class="dd-style-badge">{{entry.style}}</view>
+      </view>
+      <view class="dd-info-row2">
+        <image src="/images/icon-calendar.png" class="dd-icon-sm" />
+        <view class="dd-date-badge">{{entry.date}}</view>
+      </view>
+    </view>
+
+    <!-- Note -->
+    <view class="dd-section" wx:if="{{entry.note}}">
+      <text class="dd-section-title">备注</text>
+      <view class="dd-note-box">{{entry.note}}</view>
+    </view>
+
+    <!-- Clothing Items -->
+    <view class="dd-section" wx:if="{{items.length > 0}}">
+      <text class="dd-section-title">使用单品</text>
+      <view wx:for="{{items}}" wx:key="id" class="dd-cloth-item" bindtap="showItemDetail" data-id="{{item.id}}">
+        <image class="dd-cloth-img" src="{{item.image}}" mode="aspectFill" />
+        <view class="dd-cloth-info">
+          <text class="dd-cloth-name">{{item.name}}</text>
+          <text class="dd-cloth-meta">{{item.category}} · {{item.subcategory}}</text>
+        </view>
+        <view class="dd-cloth-tag">{{item.category}}</view>
+      </view>
+    </view>
+
+    <!-- Spacer -->
+    <view style="height: 40px;"></view>
+  </scroll-view>
+
+  <!-- Bottom Action Bar -->
+  <view class="dd-bottom-bar">
+    <view class="dd-action-btn dd-edit-btn" bindtap="editEntry">
+      <text>编辑</text>
+    </view>
+    <view class="dd-action-btn dd-delete-btn" bindtap="deleteEntry">
+      <text>删除</text>
+    </view>
+  </view>
+
+  <!-- Item Detail Modal -->
+  <view wx:if="{{showItemDetailSheet}}" class="bs-overlay-item" bindtap="hideItemDetail">
+    <view class="bs-sheet bs-sheet-item {{showItemDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <!-- Header -->
+      <view class="bs-header">
+        <view bindtap="hideItemDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+      </view>
+
+      <!-- Content -->
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- Photo -->
+        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
+          <view class="bs-photo-carousel">
+            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+          </view>
+        </view>
+
+        <!-- Info -->
+        <view class="bs-info-area" wx:if="{{detailItem}}">
+          <text class="bs-title">{{detailItem.name}}</text>
+          <text class="bs-desc">{{detailItem.category}} · {{detailItem.subCategory || detailItem.subcategory || ''}} · {{detailItem.style}}</text>
+        </view>
+
+        <!-- Tags -->
+        <view class="bs-tags-area" wx:if="{{detailItem}}">
+          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+            <text class="bs-tag-text">{{item}}</text>
+          </view>
+        </view>
+
+        <!-- Colors -->
+        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
+          <text class="bs-colors-label">颜色</text>
+          <view class="bs-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+          </view>
+        </view>
+
+        <!-- Location -->
+        <view class="bs-location-area" wx:if="{{detailItem}}">
+          <view class="bs-location-label-text">位置信息</view>
+          <view class="bs-location-pills">
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">衣柜</text>
+              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+            </view>
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">分区</text>
+              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <!-- Bottom Actions -->
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="editItemDetail">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteItemDetail">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

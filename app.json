@@ -1,0 +1,38 @@
+{
+  "pages": [
+    "pages/splash/splash",
+    "pages/home/home",
+    "pages/closet/closet",
+    "pages/closet-detail/closet-detail",
+    "pages/zone-detail/zone-detail",
+    "pages/clothes/clothes",
+    "pages/add-clothes/add-clothes",
+    "pages/diary/diary",
+    "pages/diary-detail/diary-detail",
+    "pages/add-diary/add-diary",
+    "pages/ai-outfit/ai-outfit",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F8FBFF",
+    "navigationBarTitleText": "衣语集",
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9C8E82",
+    "selectedColor": "#B08968",
+    "backgroundColor": "#F5F1E8",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "首页", "iconPath": "images/home.png", "selectedIconPath": "images/home.png" },
+      { "pagePath": "pages/closet/closet", "text": "衣柜", "iconPath": "images/layout-grid.png", "selectedIconPath": "images/layout-grid.png" },
+      { "pagePath": "pages/clothes/clothes", "text": "衣物", "iconPath": "images/shirt.png", "selectedIconPath": "images/shirt.png" },
+      { "pagePath": "pages/diary/diary", "text": "日记", "iconPath": "images/calendar.png", "selectedIconPath": "images/calendar.png" }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

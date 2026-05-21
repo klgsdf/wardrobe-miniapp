@@ -1,0 +1,153 @@
+<view class="container home-page" data-theme="{{__theme}}" bindtap="onPageTap">
+  <!-- 背景图片 + 渐变叠加 -->
+  <view class="bg-image-wrap">
+    <image class="bg-image" src="{{bgImage}}" mode="aspectFill" />
+    <view class="bg-gradient-overlay"></view>
+  </view>
+
+  <!-- Header -->
+  <view class="header" style="padding-top: {{safeTop}}px;">
+    <view class="header-content flex items-center gap-3 px-4 py-2">
+      <!-- Wardrobe name with dropdown -->
+      <view class="relative" catchtap="onHeaderTap">
+        <view class="flex items-center gap-1" bindtap="toggleDropdown">
+          <text class="text-display wardrobe-name-text" style="color: {{isLightBgTheme ? '#FFFFFF' : 'var(--text-primary)'}};">{{wardrobeName}}</text>
+          <image src="/images/chevron-down.png" class="icon-sm" style="filter: {{isLightBgTheme ? 'brightness(10)' : 'none'}};" />
+        </view>
+
+        <!-- Dropdown Menu -->
+        <view wx:if="{{showDropdown}}" class="dropdown-menu" catchtap="onDropdownTap">
+          <view wx:if="{{!editingName}}">
+            <view class="dropdown-item" bindtap="startEditName">
+              <text>重命名</text>
+            </view>
+            <view class="dropdown-divider"></view>
+            <view class="dropdown-item" bindtap="goToSettings">
+              <text>设置</text>
+            </view>
+          </view>
+          <view wx:else class="edit-name-area">
+            <input
+              class="edit-name-input"
+              value="{{editNameValue}}"
+              bindinput="onNameInput"
+              placeholder="输入名称（最多5字）"
+              maxlength="5"
+              focus
+            />
+            <view class="flex gap-2 mt-2">
+              <button class="btn-sm btn-cancel" bindtap="cancelRename">取消</button>
+              <button class="btn-sm btn-confirm" bindtap="confirmRename">确认</button>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Stats Strip -->
+  <view class="card stats-bar mx-4 mt-2">
+    <view class="stat-col">
+      <text class="text-stat">{{outfitCount}}</text>
+      <text class="text-stat-label mt-1">衣物数量</text>
+    </view>
+    <view class="divider"></view>
+    <view class="stat-col">
+      <text class="text-stat">{{monthlyWorn}}</text>
+      <text class="text-stat-label mt-1">本月穿过</text>
+    </view>
+    <view class="divider"></view>
+    <view class="stat-col">
+      <text class="text-stat">{{idleCount}}</text>
+      <text class="text-stat-label mt-1">闲置数量</text>
+    </view>
+  </view>
+
+  <!-- Weather + AI Row -->
+  <view class="weather-ai-row flex gap-3 mx-4 mt-2">
+    <!-- Weather Card -->
+    <view class="weather-card flex-1" bindtap="refreshWeather">
+      <image class="weather-bg img-cover" src="{{weatherBg}}" mode="aspectFill" />
+      <view class="weather-overlay"></view>
+      <view class="weather-content relative z-10">
+        <view class="weather-top-row">
+          <image src="{{weatherIcon}}" class="weather-icon" />
+          <text class="temp-text">{{temperature}}°C</text>
+          <view wx:if="{{weatherLoading}}" class="weather-loading"></view>
+        </view>
+        <view class="weather-bottom-row">
+          <text class="location-text">{{city}} · {{weather}}</text>
+          <text class="greeting-text">{{greeting}} {{userNickname}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI Outfit Card -->
+    <view class="ai-card flex-1">
+      <view class="ai-bg-overlay"></view>
+      <view class="relative z-10">
+        <view class="flex items-center gap-1_5 mb-1">
+          <image src="/images/sparkles.png" class="icon-xs" style="opacity: 0.7;" />
+          <text class="ai-card-title">AI 智能搭配</text>
+        </view>
+        <text class="ai-card-desc">根据天气和场合推荐穿搭</text>
+      </view>
+      <view class="rainbow-btn-wrapper relative z-10" bindtap="goToAIOutfit">
+        <button class="rainbow-btn-inner">开始搭配</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Outfit Diary Section -->
+  <view class="diary-section mx-4 mt-2">
+    <view class="diary-section-header">
+      <view class="diary-section-title">
+        <view class="diary-section-bar"></view>
+        <text class="diary-section-title-text">穿搭日记</text>
+      </view>
+      <view class="diary-view-all" bindtap="goToDiary">
+        <text>查看所有</text>
+        <image src="/images/chevron-right.png" class="icon-xs" />
+      </view>
+    </view>
+
+    <!-- Horizontal scrollable card container with edge fade -->
+    <view wx:if="{{diaryOutfits.length > 0}}" class="diary-scroll-wrap">
+      <scroll-view class="diary-scroll-area" scroll-x="true" enable-flex="true">
+        <view class="diary-card-list">
+          <view wx:for="{{diaryOutfits}}" wx:key="id" class="diary-card" bindtap="goToDiaryDetail" data-id="{{item.id}}">
+            <view class="diary-card-img-wrap">
+              <image class="diary-card-img" src="{{item.photos[0] || '/images/outfit-thumb-1.jpg'}}" mode="aspectFill" />
+            </view>
+            <view class="diary-card-info">
+              <text class="diary-card-name">{{item.name}}</text>
+              <view class="diary-card-meta">
+                <text class="diary-card-style">{{item.style}}</text>
+                <text class="diary-card-date">{{item.date}}</text>
+              </view>
+              <text wx:if="{{item.note}}" class="diary-card-note">{{item.note}}</text>
+              <view wx:if="{{item.clothingItemIds && item.clothingItemIds.length > 0}}" class="diary-card-items-glass">
+                <text class="diary-card-items-label">包含单品</text>
+                <text class="diary-card-items-text">{{item.clothingItemNames}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+      <view class="diary-fade-left"></view>
+      <view class="diary-fade-right"></view>
+    </view>
+    <view wx:else class="diary-empty-area">
+      <view class="empty-state flex flex-col items-center justify-center h-full">
+        <view class="w-12 h-12 rounded-2xl flex items-center justify-center mb-2" style="background: var(--accent-soft);">
+          <image src="/images/shirt.png" class="icon-md" />
+        </view>
+        <text class="text-13px font-medium" style="color: var(--text-primary);">还没有记录</text>
+        <text class="text-11px mt-0_5" style="color: var(--text-muted);">去日记页面添加穿搭</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Toast -->
+  <view wx:if="{{toastMessage}}" class="toast animate-toast-in">{{toastMessage}}</view>
+</view>

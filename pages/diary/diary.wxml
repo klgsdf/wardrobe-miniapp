@@ -1,0 +1,236 @@
+<view class="container diary-page" data-theme="{{__theme}}">
+  <!-- Header -->
+  <view class="safe-top px-4 pb-2 diary-header">
+    <text class="text-heading" style="color: var(--text-primary);">穿搭日记</text>
+  </view>
+
+  <!-- Calendar Card -->
+  <view class="calendar-card-wrap mx-4 mt-1">
+    <!-- Month Navigation -->
+    <view class="cal-nav-row">
+      <view bindtap="prevMonth" class="cal-nav-btn">
+        <view class="cal-nav-arrow-wrap">
+          <text class="cal-nav-arrow" style="color: var(--text-primary);">‹</text>
+        </view>
+      </view>
+      <view class="cal-title-wrap">
+        <text class="cal-year">{{currentMonth.year}}年</text>
+        <text class="cal-month" style="color: var(--accent);">{{currentMonth.month}}月</text>
+      </view>
+      <view bindtap="nextMonth" class="cal-nav-btn">
+        <view class="cal-nav-arrow-wrap">
+          <text class="cal-nav-arrow" style="color: var(--text-primary);">›</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Weekday Headers -->
+    <view class="cal-weekday-row">
+      <view wx:for="{{weekdays}}" wx:key="*this" class="cal-weekday-cell">
+        <text class="cal-weekday-text">{{item}}</text>
+      </view>
+    </view>
+
+    <!-- Calendar Days -->
+    <view class="cal-days-row">
+      <view wx:for="{{calendarDays}}" wx:key="index"
+        class="cal-day-cell {{item.dateStr === selectedDate ? 'day-selected' : ''}} {{item.isToday ? 'day-today' : ''}} {{item.day > 0 ? '' : 'day-empty'}} {{item.hasEntry ? 'day-has-entry' : ''}}"
+        bindtap="selectDate" data-day="{{item.day}}" data-date="{{item.dateStr}}">
+        <text class="cal-day-text">{{item.day > 0 ? item.day : ''}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Section Title -->
+  <view class="section-header px-4 mt-5 mb-3">
+    <view class="section-header-left">
+      <view class="section-bar" style="background: var(--accent);"></view>
+      <text class="text-heading">{{selectedDate === '2026-05-17' ? '今天的穿搭' : selectedDate + ' 的穿搭'}}</text>
+      <view class="entry-count-badge" style="background: var(--accent-soft);">
+        <text style="color: var(--accent); font-size: 11px; font-weight: 500;">{{todayEntries.length}} 套</text>
+      </view>
+    </view>
+    <view bindtap="goToAddDiary" class="add-btn">
+      <text class="add-btn-icon">+</text>
+      <text class="add-btn-text">添加</text>
+    </view>
+  </view>
+
+  <!-- Outfit List Area -->
+  <view class="px-4 outfit-list-area">
+    <!-- Empty State -->
+    <view wx:if="{{todayEntries.length === 0}}" class="empty-state-card">
+      <view class="empty-icon-wrap">
+        <text class="empty-icon">+</text>
+      </view>
+      <text class="empty-title">记录更多穿搭，打造你的风格档案</text>
+    </view>
+
+    <!-- Outfit List -->
+    <view wx:else class="outfit-scroll-box">
+      <view wx:for="{{todayEntries}}" wx:key="id" class="outfit-row" bindtap="goToDiaryDetail" data-id="{{item.id}}">
+        <!-- Image -->
+        <image class="outfit-row-img" src="{{item.photos[0] || '/images/outfit-thumb-1.jpg'}}" mode="aspectFill" />
+        <!-- Info -->
+        <view class="outfit-row-info">
+          <text class="outfit-row-name">{{item.name}}</text>
+          <view class="outfit-row-tags">
+            <view class="outfit-row-tag" style="background: var(--accent-soft);">
+              <text style="color: var(--accent); font-size: 11px; font-weight: 600;">{{item.style}}</text>
+            </view>
+          </view>
+          <view class="outfit-row-meta">
+            <text class="outfit-row-meta-text">{{item.relatedItems ? item.relatedItems.length : 0}}件单品</text>
+            <text wx:if="{{item.weather}}" class="outfit-row-meta-text"> · {{item.weather}}</text>
+          </view>
+        </view>
+        <!-- Arrow -->
+        <view class="outfit-row-arrow">
+          <text class="outfit-row-arrow-icon">›</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Detail Bottom Sheet -->
+  <view wx:if="{{showDetailModal}}" class="bs-overlay" bindtap="closeDetailModal">
+    <view class="bs-sheet {{showDetailModal ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <!-- Drag Handle -->
+      <view class="bs-drag-handle" bindtap="closeDetailModal">
+        <view class="bs-drag-bar"></view>
+      </view>
+
+      <!-- Header: Close + Share -->
+      <view class="bs-header">
+        <view bindtap="closeDetailModal" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+        <view bindtap="shareEntry" class="bs-header-btn">
+          <text class="bs-header-btn-icon" style="font-size: 16px;">↗</text>
+        </view>
+      </view>
+
+      <!-- Content -->
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- Photo Carousel -->
+        <view class="bs-photo-wrap" wx:if="{{modalEntry.photos && modalEntry.photos.length > 0}}">
+          <scroll-view class="bs-photo-carousel" scroll-x enhanced show-scrollbar="{{false}}" scroll-snap-type="x mandatory">
+            <view wx:for="{{modalEntry.photos}}" wx:key="*this" class="bs-photo-item" style="scroll-snap-align: center;">
+              <image class="bs-photo-img" src="{{item}}" mode="aspectFill" />
+            </view>
+          </scroll-view>
+          <!-- Pagination Dots -->
+          <view class="bs-photo-dots" wx:if="{{modalEntry.photos.length > 1}}">
+            <view wx:for="{{modalEntry.photos}}" wx:key="*this" class="bs-photo-dot {{index === 0 ? 'bs-photo-dot-active' : ''}}"></view>
+          </view>
+        </view>
+
+        <!-- Title & Meta -->
+        <view class="bs-info-area">
+          <text class="bs-title">{{modalEntry.name}}</text>
+          <text class="bs-desc">{{modalEntry.note || '适合周末逛街'}} · {{modalEntry.weather || '晴朗 24°C'}} · {{modalEntry.date || '5月17日'}}</text>
+        </view>
+
+        <!-- Clothing Items -->
+        <view class="bs-items-area" wx:if="{{modalItems.length > 0}}">
+          <view wx:for="{{modalItems}}" wx:key="id" class="bs-item-card" bindtap="showItemDetail" data-id="{{item.id}}">
+            <image class="bs-item-img" src="{{item.image}}" mode="aspectFill" />
+            <view class="bs-item-info">
+              <text class="bs-item-name">{{item.name}}</text>
+              <text class="bs-item-meta">{{item.material || '棉质'}} · {{item.size || '均码'}} · {{item.purchaseTime || '购入3个月'}}</text>
+            </view>
+            <view class="bs-item-tag">
+              <text class="bs-item-tag-text">{{item.category}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <!-- Bottom Actions -->
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="editModalEntry">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteModalEntry">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Item Detail Modal -->
+  <view wx:if="{{showItemDetailSheet}}" class="bs-overlay-item" bindtap="hideItemDetail">
+    <view class="bs-sheet bs-sheet-item {{showItemDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <!-- Header -->
+      <view class="bs-header">
+        <view bindtap="hideItemDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+      </view>
+
+      <!-- Content -->
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- Photo -->
+        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
+          <view class="bs-photo-carousel">
+            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+          </view>
+        </view>
+
+        <!-- Info -->
+        <view class="bs-info-area" wx:if="{{detailItem}}">
+          <text class="bs-title">{{detailItem.name}}</text>
+          <text class="bs-desc">{{detailItem.category}} · {{detailItem.subCategory || detailItem.subcategory || ''}} · {{detailItem.style}}</text>
+        </view>
+
+        <!-- Tags -->
+        <view class="bs-tags-area" wx:if="{{detailItem}}">
+          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+            <text class="bs-tag-text">{{item}}</text>
+          </view>
+        </view>
+
+        <!-- Colors -->
+        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
+          <text class="bs-colors-label">颜色</text>
+          <view class="bs-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+          </view>
+        </view>
+
+        <!-- Location -->
+        <view class="bs-location-area" wx:if="{{detailItem}}">
+          <view class="bs-location-label-text">位置信息</view>
+          <view class="bs-location-pills">
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">衣柜</text>
+              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+            </view>
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">分区</text>
+              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <!-- Bottom Actions -->
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="editItemDetail">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteItemDetail">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

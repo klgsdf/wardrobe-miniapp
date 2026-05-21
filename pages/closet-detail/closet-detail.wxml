@@ -1,0 +1,79 @@
+<view class="container detail-page" data-theme="{{__theme}}">
+  <view class="safe-header">
+    <view class="header-inner">
+      <view class="back-btn" bindtap="goBack">
+        <image src="/images/icon-back.png" class="back-icon" />
+        <text class="back-text">返回</text>
+      </view>
+      <text wx:if="{{wardrobe}}" class="header-title">{{wardrobe.name}}</text>
+      <view wx:else class="header-title"></view>
+      <view class="header-placeholder"></view>
+    </view>
+  </view>
+  <view wx:if="{{!wardrobe}}" class="flex flex-col items-center justify-center py-20">
+    <text style="color: var(--text-muted);">衣柜不存在</text>
+    <text bindtap="goBack" style="color: var(--accent); font-size: 13px; margin-top: 8px;">返回衣柜列表</text>
+  </view>
+  <view wx:else>
+    <view class="mx-4 mt-4">
+      <view class="add-btn" bindtap="showAddZone">
+        <text style="color: var(--accent); font-size: 18px; margin-right: 6px;">+</text>
+        <text class="text-body" style="color: var(--accent); font-weight: 500;">添加分区</text>
+      </view>
+    </view>
+    <view wx:if="{{wardrobe.zones.length === 0}}" class="empty-state">
+      <view class="empty-state-icon">
+        <image src="/images/grid.png" class="empty-state-img" style="filter: var(--icon-filter-accent);" />
+      </view>
+      <text class="empty-state-title">还没有分区</text>
+      <text class="empty-state-desc">点击上方按钮添加分区</text>
+    </view>
+    <view wx:else class="mx-4 mt-4">
+      <view wx:for="{{wardrobe.zones}}" wx:key="id" class="card zone-item mb-3 relative" bindtap="goToZone" data-zoneid="{{item.id}}">
+        <view class="flex items-center gap-3">
+          <view class="zone-icon-box">
+            <image src="/images/grid.png" class="zone-icon" style="filter: var(--icon-filter-accent);" />
+          </view>
+          <view class="flex-1">
+            <text class="text-body font-medium block">{{item.name}}</text>
+            <text class="text-caption" style="color: var(--text-muted);">{{item.type}} · {{item.itemCount}}件</text>
+          </view>
+          <text style="color: var(--text-muted); font-size: 16px;">›</text>
+        </view>
+        <view class="delete-zone" catchtap="deleteZone" data-id="{{item.id}}">
+          <text style="color: #C17C74; font-size: 12px;">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view wx:if="{{showAddZone}}" class="overlay flex items-end justify-center" catchtouchmove="prevent">
+    <view class="bottom-sheet w-full">
+      <view class="flex items-center justify-between mb-4">
+        <text class="text-heading">添加分区</text>
+        <view bindtap="hideAddZone" class="w-7 h-7 rounded-full flex items-center justify-center" style="background: var(--card-bg); box-shadow: 3px 3px 8px var(--shadow-dark);">
+          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+        </view>
+      </view>
+      <input class="form-input mb-3" value="{{newZoneName}}" bindinput="onZoneNameInput" placeholder="分区名称" />
+      <text class="text-caption mb-2 block" style="color: var(--text-muted);">分区类型</text>
+      <view class="zone-type-grid mb-4">
+        <view bindtap="selectZoneType" data-type="隔板层" class="zone-type-pill {{selectedZoneType === '隔板层' ? 'zone-type-active' : ''}}">
+          <text style="font-size: 12px;">隔板层</text>
+        </view>
+        <view bindtap="selectZoneType" data-type="挂衣区" class="zone-type-pill {{selectedZoneType === '挂衣区' ? 'zone-type-active' : ''}}">
+          <text style="font-size: 12px;">挂衣区</text>
+        </view>
+        <view bindtap="selectZoneType" data-type="抽屉" class="zone-type-pill {{selectedZoneType === '抽屉' ? 'zone-type-active' : ''}}">
+          <text style="font-size: 12px;">抽屉</text>
+        </view>
+        <view bindtap="selectZoneType" data-type="收纳盒" class="zone-type-pill {{selectedZoneType === '收纳盒' ? 'zone-type-active' : ''}}">
+          <text style="font-size: 12px;">收纳盒</text>
+        </view>
+        <view bindtap="selectZoneType" data-type="鞋区" class="zone-type-pill {{selectedZoneType === '鞋区' ? 'zone-type-active' : ''}}">
+          <text style="font-size: 12px;">鞋区</text>
+        </view>
+      </view>
+      <button class="btn-confirm w-full" bindtap="confirmAddZone">确认添加</button>
+    </view>
+  </view>
+</view>

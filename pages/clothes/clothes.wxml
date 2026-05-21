@@ -1,0 +1,152 @@
+<view class="container clothes-page" data-theme="{{__theme}}">
+  <view class="safe-top px-4 pb-2" style="padding-top: 64px;">
+    <text class="text-heading mb-3 block" style="color: var(--text-primary);">我的衣物</text>
+    <view class="search-bar flex items-center px-3 py-2 rounded-xl">
+      <text style="color: var(--text-muted); font-size: 14px; margin-right: 6px;">🔍</text>
+      <input class="flex-1 text-body" style="color: var(--text-primary);" placeholder="搜索衣物..." value="{{searchQuery}}" bindinput="onSearch" />
+      <view class="fav-filter-btn {{showFavoritesOnly ? 'fav-filter-active' : ''}}" bindtap="toggleFavoritesFilter">
+        <text style="font-size: 20px;">{{showFavoritesOnly ? '★' : '☆'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Left Sidebar Drawer -->
+  <view class="sidebar-drawer {{sidebarOpen ? 'sidebar-open' : ''}}" style="transform: {{sidebarOpen ? 'translateX(0)' : 'translateX(-170px)'}}; opacity: {{sidebarOpen ? 1 : 0}};">
+    <view class="sidebar-inner">
+      <text class="sidebar-title">分类</text>
+      <view wx:for="{{categories}}" wx:key="*this" bindtap="selectCategory" data-cat="{{item}}" class="sidebar-cat {{activeCategory === item ? 'sidebar-cat-active' : ''}}">
+        <text class="cat-name">{{item}}</text>
+        <text wx:if="{{item !== '全部' && expandedCategory === item}}" class="cat-arrow">▼</text>
+        <text wx:elif="{{item !== '全部'}}" class="cat-arrow">▶</text>
+      </view>
+    </view>
+    <!-- 二级分类面板 -->
+    <view wx:if="{{expandedCategory && expandedCategory !== '全部'}}" class="subcat-panel" style="transform: {{sidebarOpen ? 'translateX(0)' : 'translateX(-20px)'}}; opacity: {{sidebarOpen ? 1 : 0}};">
+      <text class="subcat-panel-title">{{expandedCategory}}</text>
+      <view wx:for="{{CATEGORY_CONFIG[expandedCategory].subCategories}}" wx:key="*this" bindtap="selectSubCategory" data-sub="{{item}}" class="subcat-panel-item {{activeSubCategory === item ? 'subcat-panel-active' : ''}}">
+        <text>{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Sidebar Handle -->
+  <view wx:if="{{!sidebarOpen}}" class="sidebar-handle" bindtap="toggleSidebar">
+    <view class="handle-icon">
+      <view class="handle-line"></view>
+      <view class="handle-line"></view>
+      <view class="handle-line"></view>
+    </view>
+    <text class="handle-label">分类</text>
+  </view>
+
+  <!-- Sidebar Overlay -->
+  <view wx:if="{{sidebarOpen}}" class="sidebar-overlay" bindtap="closeSidebar"></view>
+
+  <!-- Empty State -->
+  <view wx:if="{{masonryLeft.length === 0 && masonryRight.length === 0}}" class="flex flex-col items-center justify-center py-20">
+    <text style="font-size: 28px; color: var(--accent); margin-bottom: 8px;"></text>
+    <text class="text-body" style="color: var(--text-muted);">暂无衣物</text>
+  </view>
+
+  <!-- Masonry Grid -->
+  <view wx:else class="masonry px-4 mt-3">
+    <view class="masonry-col">
+      <view wx:for="{{masonryLeft}}" wx:key="id" class="masonry-item" bindtap="showDetail" data-id="{{item.id}}">
+        <image class="masonry-img" src="{{item.image}}" mode="widthFix" />
+        <view class="p-2">
+          <text class="text-12px font-medium block truncate">{{item.name}}</text>
+          <text class="text-10px" style="color: var(--text-muted);">{{item.category}} · {{item.style}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="masonry-col">
+      <view wx:for="{{masonryRight}}" wx:key="id" class="masonry-item" bindtap="showDetail" data-id="{{item.id}}">
+        <image class="masonry-img" src="{{item.image}}" mode="widthFix" />
+        <view class="p-2">
+          <text class="text-12px font-medium block truncate">{{item.name}}</text>
+          <text class="text-10px" style="color: var(--text-muted);">{{item.category}} · {{item.style}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Detail Bottom Sheet -->
+  <view wx:if="{{showDetail}}" class="bs-overlay" bindtap="hideDetail">
+    <view class="bs-sheet {{showDetail ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <!-- Drag Handle -->
+      <view class="bs-drag-handle" bindtap="hideDetail">
+        <view class="bs-drag-bar"></view>
+      </view>
+
+      <!-- Header -->
+      <view class="bs-header">
+        <view bindtap="hideDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+        <view bindtap="toggleFavorite" class="bs-header-btn">
+          <text style="color: {{detailItem.favorite ? '#E8927C' : '#B5ADA4'}}; font-size: 16px;">{{detailItem.favorite ? '★' : '☆'}}</text>
+        </view>
+      </view>
+
+      <!-- Content -->
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- Photo -->
+        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
+          <view class="bs-photo-carousel">
+            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+          </view>
+        </view>
+
+        <!-- Info -->
+        <view class="bs-info-area" wx:if="{{detailItem}}">
+          <text class="bs-title">{{detailItem.name}}</text>
+          <text class="bs-desc">{{detailItem.category}} · {{detailItem.style}} · {{detailWardrobeName}}</text>
+        </view>
+
+        <!-- Tags -->
+        <view class="bs-tags-area" wx:if="{{detailItem}}">
+          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+            <text class="bs-tag-text">{{item}}</text>
+          </view>
+        </view>
+
+        <!-- Colors -->
+        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
+          <text class="bs-colors-label">颜色</text>
+          <view class="bs-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+          </view>
+        </view>
+
+        <!-- Location -->
+        <view class="bs-location-area" wx:if="{{detailItem}}">
+          <view class="bs-location-label-text">位置信息</view>
+          <view class="bs-location-pills">
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">衣柜</text>
+              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+            </view>
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">分区</text>
+              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <!-- Bottom Actions -->
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="goToEdit">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteItem">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

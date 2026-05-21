@@ -1,0 +1,69 @@
+<view class="zone-page" data-theme="{{__theme}}">
+  <!-- Safe Area Header -->
+  <view class="safe-header">
+    <view class="header-inner">
+      <view class="back-btn" bindtap="navigateBack">
+        <image src="/images/icon-back.png" class="back-icon" />
+        <text class="back-text">返回</text>
+      </view>
+      <text class="header-title">{{zoneName}}</text>
+      <view class="header-placeholder"></view>
+    </view>
+  </view>
+
+  <!-- Zone info card -->
+  <view class="zone-info-wrapper">
+    <view class="card zone-info-card">
+      <view class="zone-icon-box">
+        <image src="/images/grid.png" class="zone-icon" style="filter: var(--icon-filter-accent);" />
+      </view>
+      <view class="zone-meta">
+        <text class="zone-name">{{zoneName}}</text>
+        <text class="zone-type-text">{{zoneDesc}}</text>
+        <text class="zone-wardrobe">所属衣柜：{{wardrobeName}}</text>
+      </view>
+      <view class="zone-count-box">
+        <text class="zone-count">{{itemCount}}</text>
+        <text class="zone-count-label">件</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Empty state -->
+  <block wx:if="{{zoneItems.length === 0}}">
+    <view class="empty-section">
+      <view class="card-inset empty-card">
+        <image src="/images/shirt.png" class="empty-icon" style="filter: var(--icon-filter-accent);" />
+        <text class="empty-title">还没有衣物</text>
+        <text class="empty-desc">去「衣物」页面添加衣物并分配到此分区</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- Zone items -->
+  <block wx:if="{{zoneItems.length > 0}}">
+    <view class="items-section">
+      <view class="section-header">
+        <view class="section-dot"></view>
+        <text class="section-title">分区衣物</text>
+        <text class="section-count">({{zoneItems.length}} 件)</text>
+      </view>
+
+      <view class="items-list">
+        <block wx:for="{{zoneItems}}" wx:key="id">
+          <view class="card item-card">
+            <image src="{{item.image}}" class="item-thumb" mode="aspectFill" />
+            <view class="item-info">
+              <text class="item-name">{{item.name}}</text>
+              <view class="item-tags">
+                <text class="item-tag tag-primary">{{item.category}}</text>
+                <text class="item-tag tag-secondary">{{item.style}}</text>
+              </view>
+              <text class="item-season">{{item.seasons}}</text>
+            </view>
+          </view>
+        </block>
+      </view>
+    </view>
+  </block>
+</view>

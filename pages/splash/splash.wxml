@@ -1,0 +1,29 @@
+<view class="container splash-page" style="background: var(--bg);" data-theme="{{__theme}}">
+  <!-- 光晕背景 -->
+  <view class="splash-glow"></view>
+
+  <!-- 浮动叶片 -->
+  <view class="splash-leaf-wrap">
+    <view class="splash-leaf">
+      <image src="/images/sparkles.png" style="width: 48px; height: 48px; opacity: 0.6;" />
+    </view>
+    <view class="splash-ring"></view>
+  </view>
+
+  <!-- 品牌名 -->
+  <view class="splash-brand">
+    <text class="splash-char" style="animation-delay: 0.3s">衣</text>
+    <text class="splash-char" style="animation-delay: 0.48s">语</text>
+    <text class="splash-char" style="animation-delay: 0.66s">集</text>
+  </view>
+
+  <!-- 副标题 -->
+  <view class="splash-subtitle">你的智能穿搭助手</view>
+
+  <!-- 加载圆点 -->
+  <view class="splash-dots">
+    <view class="splash-dot" style="animation-delay: 0s"></view>
+    <view class="splash-dot" style="animation-delay: 0.2s"></view>
+    <view class="splash-dot" style="animation-delay: 0.4s"></view>
+  </view>
+</view>

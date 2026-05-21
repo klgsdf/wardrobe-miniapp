@@ -1,0 +1,224 @@
+<view class="container settings-page" data-theme="{{__theme}}">
+  <!-- Header Bar -->
+  <view class="card header-bar mx-3 flex items-center px-3" style="margin-top: 44px; height: 50px;">
+    <view bindtap="goBack" class="flex items-center gap-1">
+      <image src="/images/icon-back.png" class="back-icon" />
+      <text class="text-caption" style="color: var(--text-muted);">返回</text>
+    </view>
+    <text class="text-body font-medium" style="position: absolute; left: 50%; transform: translateX(-50%);">设置</text>
+  </view>
+
+  <view class="mx-4 mt-6">
+    <!-- City -->
+    <view class="settings-group mb-4">
+      <text class="settings-group-title">城市</text>
+      <view class="card settings-item">
+        <view class="flex items-center gap-3">
+          <view class="settings-icon-box">
+            <image src="/images/cloud.png" class="settings-icon" />
+          </view>
+          <view>
+            <text class="text-body font-medium block">{{city}}</text>
+            <text class="text-caption" style="color: var(--text-muted);">当前城市</text>
+          </view>
+        </view>
+        <view class="flex items-center gap-2">
+          <view wx:if="{{locating}}" class="locating-spinner"></view>
+          <view wx:else catchtap="autoLocateCity" class="locate-btn">
+            <text class="locate-btn-text">定位</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Theme -->
+    <view class="settings-group mb-4">
+      <text class="settings-group-title">主题风格</text>
+      <view bindtap="showThemePicker" class="card settings-item">
+        <view class="flex items-center gap-3">
+          <view class="w-8 h-8 rounded-full" style="background: {{themeColor}}; box-shadow: 2px 2px 6px var(--shadow-dark);"></view>
+          <view>
+            <text class="text-body font-medium">{{themeLabel}}</text>
+            <text class="text-caption block" style="color: var(--text-muted);">点击切换个性化主题</text>
+          </view>
+        </view>
+        <image src="/images/chevron-right.png" class="settings-arrow" />
+      </view>
+    </view>
+
+    <!-- Background -->
+    <view class="settings-group mb-4">
+      <text class="settings-group-title">背景设置</text>
+      <view bindtap="showBgPicker" class="card settings-item">
+        <view class="flex items-center gap-3">
+          <view class="bg-preview-thumb">
+            <image wx:if="{{bgImage}}" class="bg-preview-img" src="{{bgImage}}" mode="aspectFill" />
+            <view wx:else class="bg-preview-placeholder"></view>
+          </view>
+          <view>
+            <text class="text-body font-medium">{{bgLabel}}</text>
+            <text class="text-caption block" style="color: var(--text-muted);">点击更换背景</text>
+          </view>
+        </view>
+        <image src="/images/chevron-right.png" class="settings-arrow" />
+      </view>
+    </view>
+
+    <!-- Idle Days -->
+    <view class="settings-group mb-4">
+      <text class="settings-group-title">闲置提醒</text>
+      <view class="card settings-item" bindtap="showIdlePicker">
+        <view class="flex items-center gap-3">
+          <view class="settings-icon-box">
+            <image src="/images/calendar.png" class="settings-icon" />
+          </view>
+          <view>
+            <text class="text-body font-medium block">{{idleDays}} 天</text>
+            <text class="text-caption" style="color: var(--text-muted);">超过此天数标记为闲置</text>
+          </view>
+        </view>
+        <view class="flex items-center gap-2">
+          <image src="/images/chevron-down.png" class="settings-arrow" style="width: 14px; height: 14px;" />
+        </view>
+      </view>
+    </view>
+
+    <!-- About -->
+    <view class="settings-group mb-4">
+      <text class="settings-group-title">关于</text>
+      <view class="card p-4">
+        <view class="flex items-center gap-3 mb-3">
+          <view class="about-icon-box">
+            <text style="font-size: 24px;">👗</text>
+          </view>
+          <text class="text-body font-medium">衣语集</text>
+        </view>
+        <text class="text-caption" style="color: var(--text-muted);">版本 1.0.0</text>
+        <text class="text-caption block mt-1" style="color: var(--text-muted);">你的智能穿搭助手</text>
+      </view>
+    </view>
+
+    <!-- Feedback -->
+    <view class="settings-group mb-4">
+      <text class="settings-group-title">反馈</text>
+      <view class="card settings-item">
+        <view class="flex items-center gap-3">
+          <view class="settings-icon-box">
+            <image src="/images/sparkles.png" class="settings-icon" />
+          </view>
+          <text class="text-body">问题反馈</text>
+        </view>
+        <image src="/images/chevron-right.png" class="settings-arrow" />
+      </view>
+    </view>
+  </view>
+
+  <!-- Theme Picker -->
+  <view wx:if="{{showThemePicker}}" class="overlay flex items-end justify-center" bindtap="hideThemePicker">
+    <view class="bottom-sheet w-full" catchtap="preventBubble">
+      <view class="flex items-center justify-between mb-4">
+        <text class="text-heading">选择主题</text>
+        <view bindtap="hideThemePicker" class="w-7 h-7 rounded-full flex items-center justify-center" style="background: var(--card-bg); box-shadow: 3px 3px 8px var(--shadow-dark);">
+          <text style="color: var(--text-muted); font-size: 12px;">×</text>
+        </view>
+      </view>
+      <view class="theme-cards-grid">
+        <view wx:for="{{themeOptions}}" wx:key="value" bindtap="selectTheme" data-theme="{{item.value}}" class="theme-card-item {{theme === item.value ? 'theme-card-active' : ''}}" style="background: {{item.bgColor}};">
+          <view class="theme-card-content">
+            <view class="theme-color-dot" style="background: {{item.color}}; box-shadow: 0 0 0 3px {{item.bgColor}}, 0 0 0 5px {{item.color}}33;"></view>
+            <text class="theme-card-label">{{item.label}}</text>
+            <text class="theme-card-desc">{{item.desc}}</text>
+            <view class="theme-keywords">
+              <text wx:for="{{item.keywords.split('、')}}" wx:for-item="kw" wx:key="*this" class="theme-keyword-tag">{{kw}}</text>
+            </view>
+          </view>
+          <view wx:if="{{theme === item.value}}" class="theme-check">
+            <view class="theme-check-inner" style="background: {{item.color}};">
+              <text style="color: white; font-size: 10px;">✓</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Background Picker -->
+  <view wx:if="{{showBgPicker}}" class="overlay flex items-end justify-center" bindtap="hideBgPicker">
+    <view class="bottom-sheet w-full" catchtap="preventBubble">
+      <view class="flex items-center justify-between mb-4">
+        <text class="text-heading">选择背景</text>
+        <view bindtap="hideBgPicker" class="w-7 h-7 rounded-full flex items-center justify-center" style="background: var(--card-bg); box-shadow: 3px 3px 8px var(--shadow-dark);">
+          <text style="color: var(--text-muted); font-size: 12px;">×</text>
+        </view>
+      </view>
+      <!-- Preset Backgrounds -->
+      <view class="bg-cards-grid">
+        <view wx:for="{{bgOptions}}" wx:key="value" bindtap="selectBg" data-image="{{item.image}}" data-label="{{item.label}}" class="bg-card-item {{bgImage === item.image ? 'bg-card-active' : ''}}">
+          <view class="bg-card-preview">
+            <image class="bg-card-img" src="{{item.image}}" mode="aspectFill" />
+            <view wx:if="{{bgImage === item.image}}" class="bg-check-overlay">
+              <view class="bg-check-circle">
+                <text style="color: white; font-size: 12px;">✓</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+      <!-- Custom Backgrounds -->
+      <view wx:if="{{customBgs.length > 0}}" class="mt-4">
+        <text class="text-caption" style="color: var(--text-muted); margin-bottom: 8px; display: block;">自定义背景</text>
+        <view class="bg-cards-grid">
+          <view wx:for="{{customBgs}}" wx:key="index" class="bg-card-item {{bgImage === item.image ? 'bg-card-active' : ''}}">
+            <view class="bg-card-preview" bindtap="selectBg" data-image="{{item.image}}" data-label="{{item.label}}">
+              <image class="bg-card-img" src="{{item.image}}" mode="aspectFill" />
+              <view wx:if="{{bgImage === item.image}}" class="bg-check-overlay">
+                <view class="bg-check-circle">
+                  <text style="color: white; font-size: 12px;">✓</text>
+                </view>
+              </view>
+            </view>
+            <view class="bg-delete-btn" catchtap="deleteCustomBg" data-index="{{index}}">
+              <text style="color: white; font-size: 10px; font-weight: 600;">×</text>
+            </view>
+          </view>
+          <!-- Add Button in Grid -->
+          <view bindtap="addCustomBg" class="bg-add-card-item">
+            <view class="bg-add-card-inner">
+              <text style="font-size: 24px; color: var(--text-muted); line-height: 1;">+</text>
+              <text class="bg-add-card-text">添加背景</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <!-- Add Custom Background Button (shown when no custom bgs) -->
+      <view wx:if="{{customBgs.length === 0}}" bindtap="addCustomBg" class="bg-add-card-item mt-4">
+        <view class="bg-add-card-inner">
+          <text style="font-size: 24px; color: var(--text-muted); line-height: 1;">+</text>
+          <text class="bg-add-card-text">添加背景</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Idle Days Picker -->
+  <view wx:if="{{showIdlePicker}}" class="overlay flex items-end justify-center" bindtap="hideIdlePicker">
+    <view class="bottom-sheet w-full" catchtap="preventBubble">
+      <view class="flex items-center justify-between mb-4">
+        <text class="text-heading">选择闲置提醒天数</text>
+        <view bindtap="hideIdlePicker" class="w-7 h-7 rounded-full flex items-center justify-center" style="background: var(--card-bg); box-shadow: 3px 3px 8px var(--shadow-dark);">
+          <text style="color: var(--text-muted); font-size: 12px;">×</text>
+        </view>
+      </view>
+      <view class="idle-options-list">
+        <view wx:for="{{idleOptions}}" wx:key="value" bindtap="selectIdleDays" data-days="{{item.value}}" class="idle-option-row {{idleDays === item.value ? 'idle-option-row-active' : ''}}">
+          <text class="idle-option-row-text">{{item.label}}</text>
+          <view wx:if="{{idleDays === item.value}}" class="idle-option-check">
+            <view class="idle-option-check-inner" style="background: var(--accent);">
+              <text style="color: white; font-size: 10px;">✓</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
