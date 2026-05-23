@@ -39,8 +39,8 @@
     <text class="handle-label">分类</text>
   </view>
 
-  <!-- Sidebar Overlay -->
-  <view wx:if="{{sidebarOpen}}" class="sidebar-overlay" bindtap="closeSidebar"></view>
+  <!-- Sidebar Overlay - 点击关闭侧边栏和二级分类 -->
+  <view wx:if="{{sidebarOpen}}" class="sidebar-overlay-full" bindtap="closeSidebar"></view>
 
   <!-- Empty State -->
   <view wx:if="{{masonryLeft.length === 0 && masonryRight.length === 0}}" class="flex flex-col items-center justify-center py-20">
@@ -71,80 +71,84 @@
   </view>
 
   <!-- Detail Bottom Sheet -->
-  <view wx:if="{{showDetail}}" class="bs-overlay" bindtap="hideDetail">
-    <view class="bs-sheet {{showDetail ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
-      <!-- Drag Handle -->
-      <view class="bs-drag-handle" bindtap="hideDetail">
-        <view class="bs-drag-bar"></view>
-      </view>
-
-      <!-- Header -->
-      <view class="bs-header">
-        <view bindtap="hideDetail" class="bs-header-btn">
-          <text class="bs-header-btn-icon">✕</text>
-        </view>
-        <view bindtap="toggleFavorite" class="bs-header-btn">
-          <text style="color: {{detailItem.favorite ? '#E8927C' : '#B5ADA4'}}; font-size: 16px;">{{detailItem.favorite ? '★' : '☆'}}</text>
+  <view wx:if="{{showDetail}}" class="sheet-overlay" bindtap="hideDetail">
+    <view class="sheet-panel" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">衣物详情</text>
+        <view class="sheet-header-actions">
+          <view bindtap="toggleFavorite" class="sheet-fav-btn">
+            <text style="color: {{detailItem.favorite ? '#E8927C' : '#B5ADA4'}}; font-size: 18px;">{{detailItem.favorite ? '★' : '☆'}}</text>
+          </view>
+          <view bindtap="hideDetail" class="sheet-close">
+            <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
+          </view>
         </view>
       </view>
 
-      <!-- Content -->
-      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <scroll-view class="sheet-body" scroll-y enhanced show-scrollbar="{{false}}">
         <!-- Photo -->
-        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
-          <view class="bs-photo-carousel">
-            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+        <view class="detail-photo-wrap" wx:if="{{detailItem}}">
+          <view class="detail-photo-carousel">
+            <image class="detail-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
           </view>
         </view>
 
         <!-- Info -->
-        <view class="bs-info-area" wx:if="{{detailItem}}">
-          <text class="bs-title">{{detailItem.name}}</text>
-          <text class="bs-desc">{{detailItem.category}} · {{detailItem.style}} · {{detailWardrobeName}}</text>
+        <view class="detail-info-area" wx:if="{{detailItem}}">
+          <text class="detail-title">{{detailItem.name}}</text>
+          <view class="detail-meta">
+            <text class="detail-category">{{detailItem.category}}</text>
+            <text wx:if="{{detailItem.subCategory}}" class="detail-subcategory">{{detailItem.subCategory}}</text>
+            <text class="detail-style">{{detailItem.style}}</text>
+          </view>
         </view>
 
         <!-- Tags -->
-        <view class="bs-tags-area" wx:if="{{detailItem}}">
-          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
-            <text class="bs-tag-text">{{item}}</text>
+        <view class="detail-tags-area" wx:if="{{detailItem && detailItem.seasons && detailItem.seasons.length > 0}}">
+          <text class="detail-section-label">适用季节</text>
+          <view class="detail-tags-row">
+            <view class="detail-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+              <text class="detail-tag-text">{{item}}</text>
+            </view>
           </view>
         </view>
 
         <!-- Colors -->
-        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
-          <text class="bs-colors-label">颜色</text>
-          <view class="bs-colors-row">
-            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+        <view class="detail-colors-area" wx:if="{{detailItem && detailItem.colors && detailItem.colors.length > 0}}">
+          <text class="detail-section-label">颜色</text>
+          <view class="detail-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="detail-color-dot" style="background: {{item}};"></view>
           </view>
         </view>
 
         <!-- Location -->
-        <view class="bs-location-area" wx:if="{{detailItem}}">
-          <view class="bs-location-label-text">位置信息</view>
-          <view class="bs-location-pills">
-            <view class="bs-location-pill">
-              <text class="bs-location-pill-label">衣柜</text>
-              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+        <view class="detail-location-area" wx:if="{{detailItem}}">
+          <text class="detail-section-label">位置信息</text>
+          <view class="detail-location-pills">
+            <view class="detail-location-pill">
+              <text class="detail-location-pill-label">衣柜</text>
+              <text class="detail-location-pill-value">{{detailWardrobeName}}</text>
             </view>
-            <view class="bs-location-pill">
-              <text class="bs-location-pill-label">分区</text>
-              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            <view class="detail-location-pill">
+              <text class="detail-location-pill-label">分区</text>
+              <text class="detail-location-pill-value">{{detailZoneName}}</text>
             </view>
           </view>
         </view>
 
-        <view style="height: 20px;"></view>
+        <view style="height: 4px;"></view>
       </scroll-view>
 
       <!-- Bottom Actions -->
-      <view class="bs-action-bar">
-        <view class="bs-edit-btn" bindtap="goToEdit">
-          <text class="bs-edit-icon">✎</text>
-          <text class="bs-edit-text">编辑</text>
+      <view class="sheet-footer detail-footer">
+        <view class="detail-edit-btn" bindtap="goToEdit">
+          <text class="detail-edit-icon">✎</text>
+          <text class="detail-edit-text">编辑</text>
         </view>
-        <view class="bs-delete-btn" bindtap="deleteItem">
-          <text class="bs-delete-icon">🗑</text>
-          <text class="bs-delete-text">删除</text>
+        <view class="detail-delete-btn" bindtap="deleteItem">
+          <text class="detail-delete-icon">🗑</text>
+          <text class="detail-delete-text">删除</text>
         </view>
       </view>
     </view>

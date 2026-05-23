@@ -492,3 +492,15 @@
 .text-10px {
   font-size: 10px;
 }
+
+/* ===== Wardrobe Name Input ===== */
+.edit-name-input-settings {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: inset 3px 3px 8px var(--shadow-inset-dark), inset -3px -3px 8px var(--shadow-inset-light);
+  font-size: 15px;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}

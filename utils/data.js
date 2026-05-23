@@ -37,23 +37,23 @@ const ZONE_TYPES = [
 /** 初始衣柜数据 */
 const INITIAL_WARDROBES = [
   {
-    id: 'w1', name: '主柜1', description: '季节', type: '主柜',
-    icon: 'Cabinet', zoneCount: 5, itemCount: 0,
+    id: 'w1', name: '主柜1', description: '季节衣物', type: '主柜',
+    icon: 'Cabinet', zoneCount: 0, itemCount: 0,
     zones: [],
   },
   {
     id: 'w2', name: '主柜', description: '日常衣物存放', type: '主柜',
-    icon: 'Cabinet', zoneCount: 3, itemCount: 2,
+    icon: 'Cabinet', zoneCount: 0, itemCount: 0,
     zones: [],
   },
   {
     id: 'w3', name: '鞋柜', description: '鞋子收纳', type: '鞋柜',
-    icon: 'Footprints', zoneCount: 2, itemCount: 2,
+    icon: 'Footprints', zoneCount: 0, itemCount: 0,
     zones: [],
   },
   {
     id: 'w4', name: '配饰抽屉', description: '围巾、帽子、腰带', type: '抽屉',
-    icon: 'Sparkles', zoneCount: 3, itemCount: 2,
+    icon: 'Sparkles', zoneCount: 0, itemCount: 0,
     zones: [],
   },
 ];
@@ -93,20 +93,7 @@ const INITIAL_CLOTHING_ITEMS = [
 ];
 
 /** 初始日记数据 */
-const INITIAL_DIARY_OUTFITS = [
-  {
-    id: 'd1', name: '休闲帽搭配', photos: ['/images/outfit-thumb-1.jpg'], style: '休闲',
-    note: '适合周末逛街', clothingItemIds: ['c1'], date: '2026-05-17',
-  },
-  {
-    id: 'd2', name: '甜美约会装', photos: ['/images/outfit-thumb-2.jpg'], style: '甜美',
-    note: '约会穿搭', clothingItemIds: ['c2'], date: '2026-05-16',
-  },
-  {
-    id: 'd3', name: '日常简约风', photos: ['/images/outfit-thumb-3.jpg'], style: '简约',
-    note: '日常通勤', clothingItemIds: ['c3'], date: '2026-05-15',
-  },
-];
+const INITIAL_DIARY_OUTFITS = [];
 
 /** 主题背景配置 */
 const THEME_BACKGROUNDS = {
@@ -141,12 +128,12 @@ function getDefaultState() {
   return {
     theme: 'cream-morandi',
     bgImage: '/images/bg-cream.jpg',
-    wardrobeName: '胖胖子的衣柜',
+    wardrobeName: '用户的衣柜',
     city: '广州市',
     weather: '小毛毛雨',
     temperature: 24,
     greeting: '晚上好,',
-    userNickname: '胖胖子',
+    userNickname: '用户',
     outfitCount: 5,
     monthlyWorn: 4,
     idleCount: 1,

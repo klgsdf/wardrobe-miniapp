@@ -11,6 +11,7 @@
     "pages/diary-detail/diary-detail",
     "pages/add-diary/add-diary",
     "pages/ai-outfit/ai-outfit",
+    "pages/ai-result/ai-result",
     "pages/settings/settings"
   ],
   "window": {

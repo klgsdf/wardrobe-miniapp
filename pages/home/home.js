@@ -11,7 +11,7 @@ Page({
     temperature: 24,
     weather: '小毛毛雨',
     greeting: '晚上好,',
-    userNickname: '胖胖子',
+    userNickname: '用户',
     city: '广州市',
     diaryOutfits: [],
     clothingItems: [],
@@ -24,6 +24,14 @@ Page({
     bgImage: '/images/bg-cream.jpg',
     safeTop: 44,
     weatherBg: '/images/weather-rain.jpg',
+    // 详情弹窗相关数据
+    showDetailSheet: false,
+    detailEntry: null,
+    detailItems: [],
+    showItemDetailSheet: false,
+    detailItem: null,
+    detailWardrobeName: '',
+    detailZoneName: '',
   },
 
   onLoad() {
@@ -35,6 +43,8 @@ Page({
     this.loadState();
     this.fetchWeatherData();
     this.syncTabBar();
+    // 确保下拉菜单在页面重新显示时是收起状态
+    this.setData({ showDropdown: false, editingName: false });
   },
 
   syncTabBar() {
@@ -52,14 +62,20 @@ Page({
     // 根据天气状态选择天气卡片背景图和图标
     const weatherInfo = this.getWeatherInfo(state.weather || '');
     const sysInfo = wx.getSystemInfoSync();
-    // 解析衣柜名称，如果包含"的衣柜"则提取前缀
-    var rawName = state.wardrobeName || '胖胖子的衣柜';
+    // 解析衣柜名称，提取昵称部分
+    var rawName = state.wardrobeName || '用户的衣柜';
     var displayName = rawName;
-    if (rawName.indexOf('的衣柜') === rawName.length - 3) {
+    var nickname = '用户'; // 默认昵称
+    
+    // 如果衣柜名称包含"的衣柜"，提取前面的部分作为昵称
+    if (rawName.indexOf('的衣柜') !== -1) {
+      nickname = rawName.replace('的衣柜', '');
       displayName = rawName;
-    } else if (rawName.indexOf('的衣柜') === -1) {
+    } else {
       displayName = rawName + '的衣柜';
+      nickname = rawName;
     }
+    
     this.setData({
       __theme: theme,
       wardrobeName: displayName,
@@ -69,7 +85,7 @@ Page({
       temperature: state.temperature || 24,
       weather: state.weather || '小毛毛雨',
       greeting: state.greeting || '晚上好,',
-      userNickname: state.userNickname || '胖胖子',
+      userNickname: nickname,
       city: state.city || '广州市',
       diaryOutfits: this.enrichDiaryOutfits(state.diaryOutfits || [], state.clothingItems || []),
       clothingItems: state.clothingItems || [],
@@ -112,11 +128,15 @@ Page({
     const name = this.data.editNameValue.trim();
     if (name) {
       var displayName = name;
+      var nickname = name;
       if (name.indexOf('的衣柜') === -1) {
         displayName = name + '的衣柜';
+        nickname = name;
+      } else {
+        nickname = name.replace('的衣柜', '');
       }
       app.updateWardrobeName(displayName);
-      this.setData({ wardrobeName: displayName, editingName: false });
+      this.setData({ wardrobeName: displayName, userNickname: nickname, editingName: false, showDropdown: false });
     }
   },
 
@@ -192,13 +212,15 @@ Page({
           const d = res.data.current_condition[0];
           const area = res.data.nearest_area && res.data.nearest_area[0];
           const weatherText = d.weatherDesc && d.weatherDesc[0] ? d.weatherDesc[0].value : '';
+          // 将英文天气描述转换为中文
+          const translatedWeather = this.translateWeatherToChinese(weatherText);
           const weatherData = {
-            weather: weatherText,
+            weather: translatedWeather,
             temperature: parseInt(d.temp_C),
             greeting: greeting,
           };
           app.updateWeather(weatherData);
-          const info = this.getWeatherInfo(weatherText);
+          const info = this.getWeatherInfo(translatedWeather);
           this.setData({
             weather: weatherData.weather,
             temperature: weatherData.temperature,
@@ -216,6 +238,81 @@ Page({
         this.setData({ greeting, weatherLoading: false });
       },
     });
+  },
+
+  /** 将英文天气描述翻译为中文 */
+  translateWeatherToChinese(weatherText) {
+    if (!weatherText) return '晴天';
+    
+    const w = weatherText.toLowerCase().trim();
+    
+    // 晴天相关
+    if (w.indexOf('sunny') !== -1 || w.indexOf('clear') !== -1) {
+      return '晴天';
+    }
+    // 少云/晴间多云
+    if (w.indexOf('partly cloudy') !== -1) {
+      return '晴间多云';
+    }
+    // 多云
+    if (w.indexOf('cloudy') !== -1 || w.indexOf('overcast') !== -1) {
+      return '多云';
+    }
+    // 阴天
+    if (w.indexOf('mist') !== -1 || w.indexOf('fog') !== -1) {
+      return '雾天';
+    }
+    // 毛毛雨
+    if (w.indexOf('drizzle') !== -1 || w.indexOf('light rain') !== -1) {
+      return '毛毛雨';
+    }
+    // 小雨
+    if (w.indexOf('light rain') !== -1 || w.indexOf('patchy rain') !== -1) {
+      return '小雨';
+    }
+    // 中雨
+    if (w.indexOf('moderate rain') !== -1 || w.indexOf('rain') !== -1) {
+      return '中雨';
+    }
+    // 大雨/暴雨
+    if (w.indexOf('heavy rain') !== -1 || w.indexOf('torrential') !== -1) {
+      return '大雨';
+    }
+    // 雷暴
+    if (w.indexOf('thunder') !== -1 || w.indexOf('tstorm') !== -1) {
+      return '雷阵雨';
+    }
+    // 雪
+    if (w.indexOf('snow') !== -1 || w.indexOf('blizzard') !== -1) {
+      return '雪天';
+    }
+    // 小雪
+    if (w.indexOf('light snow') !== -1) {
+      return '小雪';
+    }
+    // 大雪
+    if (w.indexOf('heavy snow') !== -1) {
+      return '大雪';
+    }
+    // 雨夹雪
+    if (w.indexOf('sleet') !== -1 || w.indexOf('rain and snow') !== -1) {
+      return '雨夹雪';
+    }
+    // 冰雹
+    if (w.indexOf('hail') !== -1 || w.indexOf('ice') !== -1) {
+      return '冰雹';
+    }
+    // 霾
+    if (w.indexOf('haze') !== -1 || w.indexOf('smog') !== -1) {
+      return '霾';
+    }
+    // 风
+    if (w.indexOf('windy') !== -1 || w.indexOf('breezy') !== -1) {
+      return '有风';
+    }
+    
+    // 默认返回晴天
+    return '晴天';
   },
 
   /** Get weather background image and icon based on weather text */
@@ -242,7 +339,7 @@ Page({
       return { bg: '/images/weather-rain.jpg', icon: '/images/cloud.png' };
     }
     // 晴天（默认）
-    return { bg: '/images/weather-sunny.jpg', icon: '/images/home.png' };
+    return { bg: '/images/weather-sunny.jpg', icon: '/images/cloud.png' };
   },
 
   /** Navigate to diary page */
@@ -254,6 +351,161 @@ Page({
   goToDiaryDetail(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: `/pages/diary-detail/diary-detail?id=${id}` });
+  },
+
+  /** Show diary detail sheet (modal) - 复刻日记页弹窗逻辑 */
+  showDiaryDetail(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+
+    const state = app.getState();
+    const diaries = state.diaryOutfits || [];
+    const clothingItems = state.clothingItems || [];
+    let entry = diaries.find(d => d.id === id);
+
+    if (!entry) {
+      wx.showToast({ title: '未找到穿搭记录', icon: 'none' });
+      return;
+    }
+
+    // 解析 clothingItemIds 为完整单品对象（与日记页 goToDiaryDetail 一致）
+    const items = (entry.clothingItemIds || []).map(cid => {
+      return clothingItems.find(c => c.id === cid);
+    }).filter(Boolean);
+
+    this.setData({
+      detailEntry: entry,
+      detailItems: items,
+      showDetailSheet: true,
+    });
+  },
+
+  /** Hide diary detail sheet */
+  hideDiaryDetail() {
+    this.setData({ showDetailSheet: false });
+    setTimeout(() => {
+      this.setData({ detailEntry: null, detailItems: [] });
+    }, 300);
+  },
+
+  /** Edit diary entry - 跳转至编辑页 */
+  editDiaryEntry() {
+    const entry = this.data.detailEntry;
+    if (!entry) return;
+    this.hideDiaryDetail();
+    wx.navigateTo({ url: `/pages/add-diary/add-diary?id=${entry.id}` });
+  },
+
+  /** Delete diary entry */
+  deleteDiaryEntry() {
+    const entry = this.data.detailEntry;
+    if (!entry) return;
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这套穿搭记录吗？',
+      confirmColor: '#C17C74',
+      success: (res) => {
+        if (res.confirm) {
+          app.deleteDiaryOutfit(entry.id);
+          this.hideDiaryDetail();
+          this.loadState();
+          wx.showToast({ title: '已删除', icon: 'success' });
+        }
+      },
+    });
+  },
+
+  /** Share diary entry */
+  shareDiaryEntry() {
+    const entry = this.data.detailEntry;
+    if (!entry) return;
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    });
+    wx.showToast({ title: '点击右上角分享', icon: 'none' });
+  },
+
+  /** Show item detail from diary detail sheet */
+  showItemDetailFromSheet(e) {
+    const targetId = e.currentTarget.dataset.id;
+    if (!targetId) return;
+
+    const state = app.getState();
+    const clothingItems = state.clothingItems || [];
+    let item = null;
+    for (var i = 0; i < clothingItems.length; i++) {
+      if (clothingItems[i].id === targetId) {
+        item = clothingItems[i];
+        break;
+      }
+    }
+
+    if (!item) {
+      wx.showToast({ title: '未找到单品详情', icon: 'none' });
+      return;
+    }
+
+    let wardrobeName = '未分配';
+    let zoneName = '未分配';
+    if (item.wardrobeId) {
+      const wardrobe = state.wardrobes.find(function(w) { return w.id === item.wardrobeId; });
+      if (wardrobe) {
+        wardrobeName = wardrobe.name;
+        if (item.zoneId && wardrobe.zones) {
+          const zone = wardrobe.zones.find(function(z) { return z.id === item.zoneId; });
+          if (zone) zoneName = zone.name;
+        }
+      }
+    }
+
+    this.setData({
+      detailItem: item,
+      detailWardrobeName: wardrobeName,
+      detailZoneName: zoneName,
+      showItemDetailSheet: true,
+    });
+  },
+
+  /** Hide item detail sheet */
+  hideItemDetail() {
+    this.setData({ showItemDetailSheet: false });
+    setTimeout(() => {
+      this.setData({ detailItem: null, detailWardrobeName: '', detailZoneName: '' });
+    }, 300);
+  },
+
+  /** Edit item detail */
+  editItemDetail() {
+    const item = this.data.detailItem;
+    if (!item) return;
+    this.hideItemDetail();
+    wx.navigateTo({ url: `/pages/add-clothes/add-clothes?id=${item.id}` });
+  },
+
+  /** Delete item detail */
+  deleteItemDetail() {
+    const item = this.data.detailItem;
+    if (!item) return;
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除「${item.name}」吗？删除后不可恢复。`,
+      confirmColor: '#C17C74',
+      success: (res) => {
+        if (res.confirm) {
+          app.deleteClothingItem(item.id);
+          this.hideItemDetail();
+          // 更新首页数据
+          this.loadState();
+          wx.showToast({ title: '已删除', icon: 'success' });
+        }
+      },
+    });
+  },
+
+  /** Prevent event bubbling */
+  preventBubble() {
+    // 阻止事件冒泡，防止点击弹窗内容时关闭弹窗
   },
 
   /** Navigate to AI outfit page */

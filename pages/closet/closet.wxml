@@ -1,20 +1,21 @@
 <view class="container closet-page" data-theme="{{__theme}}">
-  <view class="safe-top px-4 pb-2" style="padding-top: 44px;">
-    <text class="text-heading">我的衣柜</text>
+  <!-- Header -->
+  <view class="safe-top px-4 pb-2" style="padding-top: 54px;">
+    <text class="page-title">我的衣柜</text>
   </view>
 
   <!-- Stats Bar -->
-  <view class="card stats-bar mx-4 mt-2">
+  <view class="glass-panel stats-bar mx-4 mt-2">
     <view class="stat-col">
       <text class="text-stat">{{totalWardrobes}}</text>
       <text class="text-stat-label mt-1">个衣柜</text>
     </view>
-    <view class="divider"></view>
+    <view class="stats-divider"></view>
     <view class="stat-col">
       <text class="text-stat">{{totalItems}}</text>
       <text class="text-stat-label mt-1">件衣物</text>
     </view>
-    <view class="divider"></view>
+    <view class="stats-divider"></view>
     <view class="stat-col">
       <text class="text-stat">{{totalZones}}</text>
       <text class="text-stat-label mt-1">个分区</text>
@@ -24,14 +25,14 @@
   <!-- Add Button -->
   <view class="mx-4 mt-4">
     <view class="add-btn" bindtap="showAdd">
-      <text style="color: var(--accent); font-size: 18px; margin-right: 6px;">+</text>
-      <text class="text-body" style="color: var(--accent); font-weight: 500;">添加衣柜</text>
+      <view class="add-btn-icon">+</view>
+      <text class="add-btn-text">添加衣柜</text>
     </view>
   </view>
 
   <!-- Wardrobe List -->
   <view class="mx-4 mt-4">
-    <view wx:for="{{wardrobes}}" wx:key="id" class="card wardrobe-item mb-3" bindtap="goToDetail" data-id="{{item.id}}">
+    <view wx:for="{{wardrobes}}" wx:key="id" class="glass-panel wardrobe-item mb-3" bindtap="goToDetail" data-id="{{item.id}}" bindlongpress="onWardrobeLongPress" data-wardrobe-id="{{item.id}}" data-wardrobe-name="{{item.name}}">
       <view class="icon-box">
         <image src="/images/layout-grid.png" class="icon-box-img" />
       </view>
@@ -44,15 +45,40 @@
     </view>
   </view>
 
-  <!-- Add Dialog -->
-  <view wx:if="{{showAddDialog}}" class="overlay flex items-center justify-center px-6" catchtouchmove="prevent">
-    <view class="dialog-box w-full">
-      <text class="text-heading mb-4 block">添加衣柜</text>
-      <input class="form-input mb-3" value="{{newName}}" bindinput="onNameInput" placeholder="衣柜名称" />
-      <input class="form-input mb-3" value="{{newDesc}}" bindinput="onDescInput" placeholder="描述（可选）" />
-      <view class="flex gap-2">
-        <button class="btn-sm btn-cancel flex-1" bindtap="hideAdd">取消</button>
-        <button class="btn-sm btn-confirm flex-1" bindtap="confirmAdd">确认</button>
+  <!-- Add Dialog (Bottom Sheet) -->
+  <view wx:if="{{showAddDialog}}" class="sheet-overlay" catchtouchmove="prevent">
+    <view class="sheet-panel" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">添加衣柜</text>
+        <view bindtap="hideAdd" class="sheet-close">
+          <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
+        </view>
+      </view>
+      <view class="sheet-body">
+        <text class="field-label">衣柜名称</text>
+        <input class="glass-input mb-3" value="{{newName}}" bindinput="onNameInput" placeholder="给衣柜起个名字" placeholder-class="input-placeholder" />
+        <text class="field-label">描述（可选）</text>
+        <input class="glass-input mb-4" value="{{newDesc}}" bindinput="onDescInput" placeholder="简短描述" placeholder-class="input-placeholder" />
+        <button class="btn-gradient btn-gradient-sm" bindtap="confirmAdd">确认添加</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- Edit Wardrobe Name Dialog -->
+  <view wx:if="{{showEditDialog}}" class="sheet-overlay" catchtouchmove="prevent">
+    <view class="sheet-panel" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">编辑衣柜名称</text>
+        <view bindtap="hideEditDialog" class="sheet-close">
+          <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
+        </view>
+      </view>
+      <view class="sheet-body">
+        <text class="field-label">衣柜名称</text>
+        <input class="glass-input mb-4" value="{{editNameValue}}" bindinput="onEditNameInput" placeholder="请输入新名称" placeholder-class="input-placeholder" />
+        <button class="btn-gradient btn-gradient-sm" bindtap="confirmEditWardrobeName">确认修改</button>
       </view>
     </view>
   </view>

@@ -40,7 +40,7 @@
     </view>
   </block>
 
-  <!-- Zone items -->
+  <!-- Zone items - Masonry Grid -->
   <block wx:if="{{zoneItems.length > 0}}">
     <view class="items-section">
       <view class="section-header">
@@ -49,21 +49,98 @@
         <text class="section-count">({{zoneItems.length}} 件)</text>
       </view>
 
-      <view class="items-list">
-        <block wx:for="{{zoneItems}}" wx:key="id">
-          <view class="card item-card">
-            <image src="{{item.image}}" class="item-thumb" mode="aspectFill" />
-            <view class="item-info">
-              <text class="item-name">{{item.name}}</text>
-              <view class="item-tags">
-                <text class="item-tag tag-primary">{{item.category}}</text>
-                <text class="item-tag tag-secondary">{{item.style}}</text>
-              </view>
-              <text class="item-season">{{item.seasons}}</text>
+      <view class="masonry px-0 mt-3">
+        <view class="masonry-col">
+          <view wx:for="{{masonryLeft}}" wx:key="id" class="masonry-item" bindlongpress="showItemDetail" data-id="{{item.id}}">
+            <image class="masonry-img" src="{{item.image}}" mode="widthFix" />
+            <view class="p-2">
+              <text class="text-12px font-medium block truncate">{{item.name}}</text>
+              <text class="text-10px" style="color: var(--text-muted);">{{item.category}} · {{item.style}}</text>
             </view>
           </view>
-        </block>
+        </view>
+        <view class="masonry-col">
+          <view wx:for="{{masonryRight}}" wx:key="id" class="masonry-item" bindlongpress="showItemDetail" data-id="{{item.id}}">
+            <image class="masonry-img" src="{{item.image}}" mode="widthFix" />
+            <view class="p-2">
+              <text class="text-12px font-medium block truncate">{{item.name}}</text>
+              <text class="text-10px" style="color: var(--text-muted);">{{item.category}} · {{item.style}}</text>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
   </block>
+
+  <!-- Item Detail Bottom Sheet -->
+  <view wx:if="{{showItemDetailSheet}}" class="bs-overlay-item" bindtap="hideItemDetail">
+    <view class="bs-sheet bs-sheet-item {{showItemDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <!-- Header -->
+      <view class="bs-header">
+        <view bindtap="hideItemDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+      </view>
+
+      <!-- Content -->
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- Photo -->
+        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
+          <view class="bs-photo-carousel">
+            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+          </view>
+        </view>
+
+        <!-- Info -->
+        <view class="bs-info-area" wx:if="{{detailItem}}">
+          <text class="bs-title">{{detailItem.name}}</text>
+          <text class="bs-desc">{{detailItem.category}} · {{detailItem.subCategory || detailItem.subcategory || ''}} · {{detailItem.style}}</text>
+        </view>
+
+        <!-- Tags -->
+        <view class="bs-tags-area" wx:if="{{detailItem}}">
+          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+            <text class="bs-tag-text">{{item}}</text>
+          </view>
+        </view>
+
+        <!-- Colors -->
+        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
+          <text class="bs-colors-label">颜色</text>
+          <view class="bs-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+          </view>
+        </view>
+
+        <!-- Location -->
+        <view class="bs-location-area" wx:if="{{detailItem}}">
+          <view class="bs-location-label-text">位置信息</view>
+          <view class="bs-location-pills">
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">衣柜</text>
+              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+            </view>
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">分区</text>
+              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <!-- Bottom Actions -->
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="editItemDetail">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteItemDetail">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>

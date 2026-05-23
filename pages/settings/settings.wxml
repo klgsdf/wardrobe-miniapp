@@ -9,6 +9,23 @@
   </view>
 
   <view class="mx-4 mt-6">
+    <!-- Wardrobe Name -->
+    <view class="settings-group mb-4">
+      <text class="settings-group-title">衣柜名称</text>
+      <view class="card settings-item" bindtap="showWardrobeNamePicker">
+        <view class="flex items-center gap-3">
+          <view class="settings-icon-box">
+            <image src="/images/shirt.png" class="settings-icon" />
+          </view>
+          <view>
+            <text class="text-body font-medium block">{{wardrobeName}}</text>
+            <text class="text-caption" style="color: var(--text-muted);">点击修改衣柜名称</text>
+          </view>
+        </view>
+        <image src="/images/chevron-right.png" class="settings-arrow" />
+      </view>
+    </view>
+
     <!-- City -->
     <view class="settings-group mb-4">
       <text class="settings-group-title">城市</text>
@@ -218,6 +235,32 @@
             </view>
           </view>
         </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Wardrobe Name Picker -->
+  <view wx:if="{{showWardrobeNamePicker}}" class="overlay flex items-center justify-center" bindtap="hideWardrobeNamePicker">
+    <view class="bottom-sheet w-full" style="max-width: 500rpx;" catchtap="preventBubble">
+      <view class="flex items-center justify-between mb-4">
+        <text class="text-heading">修改衣柜名称</text>
+        <view bindtap="hideWardrobeNamePicker" class="w-7 h-7 rounded-full flex items-center justify-center" style="background: var(--card-bg); box-shadow: 3px 3px 8px var(--shadow-dark);">
+          <text style="color: var(--text-muted); font-size: 12px;">×</text>
+        </view>
+      </view>
+      <view class="mb-4">
+        <input
+          class="edit-name-input-settings"
+          value="{{editWardrobeNameValue}}"
+          bindinput="onWardrobeNameInput"
+          placeholder="输入衣柜名称（最多10字）"
+          maxlength="10"
+          focus
+        />
+      </view>
+      <view class="flex gap-2">
+        <button class="btn-sm btn-cancel" bindtap="hideWardrobeNamePicker">取消</button>
+        <button class="btn-sm btn-confirm" bindtap="confirmWardrobeName">确认</button>
       </view>
     </view>
   </view>

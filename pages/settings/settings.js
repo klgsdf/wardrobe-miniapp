@@ -8,12 +8,15 @@ Page({
     theme: 'cream-morandi',
     idleDays: 30,
     bgImage: '/images/bg-cream.jpg',
+    wardrobeName: '胖胖子的衣柜',
     themeOptions: THEME_OPTIONS,
     bgOptions: [],
     customBgs: [],
     showThemePicker: false,
     showBgPicker: false,
     showIdlePicker: false,
+    showWardrobeNamePicker: false,
+    editWardrobeNameValue: '',
     idleOptions: [
       { value: 15, label: '15天' },
       { value: 30, label: '30天' },
@@ -46,6 +49,7 @@ Page({
       theme: s.theme,
       idleDays: s.idleDays,
       bgImage: s.bgImage || '/images/bg-cream.jpg',
+      wardrobeName: s.wardrobeName || '胖胖子的衣柜',
       themeLabel: themeLabel,
       themeColor: themeColor,
       bgLabel: bgLabel,
@@ -221,6 +225,34 @@ Page({
       app.updateIdleDays(days);
       this.setData({ idleDays: days, showIdlePicker: false });
       wx.showToast({ title: '已更新为 ' + days + ' 天' });
+    }
+  },
+
+  // Wardrobe Name
+  showWardrobeNamePicker() {
+    this.setData({ showWardrobeNamePicker: true, editWardrobeNameValue: this.data.wardrobeName });
+  },
+  hideWardrobeNamePicker() {
+    this.setData({ showWardrobeNamePicker: false });
+  },
+  onWardrobeNameInput(e) {
+    this.setData({ editWardrobeNameValue: e.detail.value });
+  },
+  confirmWardrobeName() {
+    const name = this.data.editWardrobeNameValue.trim();
+    if (name) {
+      var displayName = name;
+      var nickname = name;
+      if (name.indexOf('的衣柜') === -1) {
+        displayName = name + '的衣柜';
+        nickname = name;
+      } else {
+        nickname = name.replace('的衣柜', '');
+      }
+      app.updateWardrobeName(displayName);
+      app.setState({ userNickname: nickname });
+      this.setData({ wardrobeName: displayName, showWardrobeNamePicker: false });
+      wx.showToast({ title: '名称已更新' });
     }
   },
 

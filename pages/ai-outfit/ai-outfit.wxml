@@ -1,154 +1,119 @@
 <view class="container ai-page" data-theme="{{__theme}}">
-  <view class="safe-header">
-    <view class="header-inner">
-      <view bindtap="goBack" class="w-9 h-9 rounded-full flex items-center justify-center" style="background: var(--bg); box-shadow: 4px 4px 10px var(--shadow-dark);"><text style="color: var(--text-primary); font-size: 18px;">&lt;</text></view>
-      <view class="header-title flex items-center gap-2">
-        <text style="color: var(--accent); font-size: 20px;"></text>
-        <text>AI 智能搭配</text>
-      </view>
-      <view class="header-placeholder"></view>
+  <!-- Background Image -->
+  <view class="bg-image-wrap">
+    <image class="bg-image" src="/images/bg-ai-outfit.jpg" mode="aspectFill" />
+    <view class="bg-overlay"></view>
+  </view>
+
+  <!-- Header -->
+  <view class="ai-header">
+    <view class="header-back" bindtap="goBack">
+      <image src="/images/icon-back.png" class="header-back-icon" />
     </view>
   </view>
-  <scroll-view scroll-y class="flex-1 px-4 pb-6" style="height: calc(100vh - 94px);">
-    <!-- Input -->
-    <view class="mt-3">
-      <text class="text-caption block mb-2" style="color: var(--text-secondary);">描述今天的穿搭需求</text>
-      <textarea class="form-input" value="{{inputValue}}" bindinput="onInput" placeholder="例如：今天25度，要去见客户..." rows="4" />
+
+  <!-- Title Section -->
+  <view class="ai-title-section">
+    <text class="ai-title">穿搭智能推荐</text>
+    <view class="ai-subtitle">
+      <image src="/images/sparkles.png" class="ai-subtitle-icon" />
+      <text>AI 驱动的个性化搭配助手</text>
     </view>
-    <!-- History -->
-    <view class="mt-4">
-      <view class="flex items-center justify-between mb-2">
-        <text class="text-caption" style="color: var(--text-muted);">历史搜索</text>
-        <view wx:if="{{searchHistory.length > 0}}" bindtap="clearHistory" class="flex items-center gap-0_5" style="color: #C17C74; font-size: 11px;"><text></text><text>清空</text></view>
-      </view>
-      <view wx:if="{{searchHistory.length === 0}}" class="text-caption py-2" style="color: var(--text-muted);">暂无搜索记录</view>
-      <view wx:else class="flex flex-wrap gap-2">
-        <view wx:for="{{searchHistory}}" wx:key="*this" bindtap="addTag" data-tag="{{item}}" class="history-pill">{{item}}</view>
-      </view>
-    </view>
-    <!-- Submit Button -->
-    <button class="ai-btn w-full mt-5" bindtap="submit" disabled="{{isAnalyzing || !inputValue.trim()}}">
-      <text style="margin-right: 4px;"></text>
-      <text>AI 推荐搭配</text>
-    </button>
-    <!-- Recommendations -->
-    <view wx:if="{{recommendations.length > 0}}" class="mt-6">
-      <view class="flex items-center gap-2 mb-3">
-        <view class="w-1 h-4 rounded-full" style="background: var(--accent);"></view>
-        <text class="text-heading">推荐搭配</text>
-      </view>
-      <view wx:for="{{recommendations}}" wx:key="id" class="rec-card mb-3">
-        <view bindtap="toggleRec" data-id="{{item.id}}" class="p-4 flex items-center gap-3">
-          <view class="rank-badge" style="background: {{item.rankBg}}; color: {{item.rankColor}};">{{index+1}}</view>
-          <view class="flex-1 min-w-0">
-            <view class="flex items-center gap-2">
-              <text class="text-body font-medium truncate">{{item.name}}</text>
-              <text class="text-10px px-2 py-0_5 rounded-full" style="background: var(--accent-soft); color: var(--accent);">{{item.style}}</text>
-            </view>
-            <text class="text-caption line-clamp-1">{{item.desc}}</text>
-          </view>
-          <view class="flex flex-col items-center">
-            <text class="text-11px font-semibold" style="color: {{item.rankColor}};">{{item.confidence}}%</text>
-            <text class="text-9px" style="color: var(--text-muted);">匹配度</text>
-          </view>
+  </view>
+
+  <!-- Main Content -->
+  <scroll-view scroll-y class="ai-scroll" enhanced show-scrollbar="{{false}}" >
+    <!-- Input Card -->
+    <view class="glass-card input-area mx-4">
+      <!-- Image Upload & Preview -->
+      <view class="upload-section">
+        <view class="upload-btn {{uploadedImage ? 'upload-btn-done' : ''}}" bindtap="chooseImage">
+          <image src="/images/grid.png" class="upload-icon" />
+          <text>{{uploadedImage ? '更换图片' : '上传图片'}}</text>
         </view>
-        <view wx:if="{{expandedRecId === item.id}}" class="px-4 pb-4">
-          <view class="rounded-xl p-3" style="background: var(--bg); box-shadow: inset 3px 3px 8px var(--shadow-inset-dark);">
-            <text class="text-caption block mb-2" style="color: var(--text-muted);">推荐单品（点击查看详情）</text>
-            <view class="grid grid-cols-3 gap-2">
-              <view wx:for="{{item.matchedItems}}" wx:for-item="subItem" wx:key="id" bindtap="showItemDetail" data-id="{{subItem.id}}" class="rec-item-card">
-                <view class="aspect-square overflow-hidden"><image class="w-full h-full object-cover" src="{{subItem.image}}" mode="aspectFill" /></view>
-                <view class="px-1_5 py-1.5">
-                  <text class="text-10px font-medium truncate block">{{subItem.name}}</text>
-                </view>
-              </view>
-            </view>
+        <!-- Image Preview -->
+        <view wx:if="{{uploadedImage}}" class="image-preview-wrap">
+          <image class="image-preview-thumb" src="{{uploadedImage}}" mode="aspectFill" />
+          <view class="image-preview-remove" bindtap="removeImage">
+            <text>✕</text>
           </view>
         </view>
       </view>
+
+      <textarea 
+        class="input-textarea" 
+        value="{{inputValue}}" 
+        bindinput="onInput" 
+        placeholder="描述今日穿搭需求或上传图片获取推荐" 
+        maxlength="200"
+        auto-height
+      />
+      <view class="char-count">
+        <text class="char-count-text {{inputValue.length >= 200 ? 'char-count-full' : ''}}">{{inputValue.length}}/200</text>
+      </view>
+
+      <!-- AI Thinking Status -->
+      <view wx:if="{{isAnalyzing}}" class="ai-thinking-bar">
+        <image src="/images/sparkles.png" class="thinking-icon" />
+        <view class="thinking-text">
+          <text class="thinking-main">{{analysisStatusText}}</text>
+          <text class="thinking-sub">{{analysisStepText}}</text>
+        </view>
+      </view>
+      <!-- Analysis Steps -->
+      <view wx:if="{{isAnalyzing}}" class="analysis-steps">
+        <view class="analysis-step {{analysisStep >= 1 ? 'analysis-step-done' : ''}} {{analysisStep === 1 ? 'analysis-step-active' : ''}}">
+          <view class="step-dot">
+            <text wx:if="{{analysisStep > 1}}">✓</text>
+            <text wx:elif="{{analysisStep === 1}}">●</text>
+            <text wx:else>○</text>
+          </view>
+          <text class="step-label">图片分析</text>
+        </view>
+        <view class="step-line {{analysisStep >= 2 ? 'step-line-done' : ''}}"></view>
+        <view class="analysis-step {{analysisStep >= 2 ? 'analysis-step-done' : ''}} {{analysisStep === 2 ? 'analysis-step-active' : ''}}">
+          <view class="step-dot">
+            <text wx:if="{{analysisStep > 2}}">✓</text>
+            <text wx:elif="{{analysisStep === 2}}">●</text>
+            <text wx:else>○</text>
+          </view>
+          <text class="step-label">生成方案</text>
+        </view>
+      </view>
     </view>
+
+    <!-- Action Buttons -->
+    <view class="action-bar mx-4">
+      <button class="btn-primary {{(hasInput || uploadedImage) ? 'btn-primary-active' : ''}}" bindtap="submit" disabled="{{isAnalyzing || (!hasInput && !uploadedImage)}}">
+        <text class="btn-check">✓</text>
+        <text>生成推荐</text>
+      </button>
+      <button class="btn-secondary" bindtap="resetInput">
+        <text class="btn-icon">↻</text>
+        <text>重置内容</text>
+      </button>
+    </view>
+
+    <!-- History Section -->
+    <view class="glass-card history-area mx-4 mt-4">
+      <view class="history-header">
+        <image src="/images/calendar.png" class="history-header-icon" />
+        <text class="history-header-title">历史记录</text>
+      </view>
+      <view wx:if="{{searchHistory.length === 0}}" class="history-empty">
+        <text>暂无搜索记录</text>
+      </view>
+      <view wx:else class="history-tags">
+        <view wx:for="{{searchHistory}}" wx:key="*this" bindtap="addTag" data-tag="{{item}}" class="history-tag">
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Spacer -->
+    <view style="height: 40px;"></view>
   </scroll-view>
 
-  <!-- Analyzing Overlay -->
-  <view wx:if="{{isAnalyzing}}" class="fixed inset-0 flex flex-col items-center justify-center" style="z-index: 200; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);">
-    <view class="relative w-40 h-40 rounded-3xl overflow-hidden mb-6 flex items-center justify-center" style="box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 8px 32px rgba(0,0,0,0.4);">
-      <text style="font-size: 48px;"></text>
-      <view class="absolute inset-0" style="border: 2px solid rgba(255,255,255,0.3); border-radius: 24px;"></view>
-      <view class="absolute left-0 right-0 h-px" style="background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.9) 30%, rgba(255,255,255,0.9) 70%, transparent 100%); box-shadow: 0 0 6px 1px rgba(255,255,255,0.5); animation: scanLine 2s linear infinite;"></view>
-    </view>
-    <text class="text-body font-medium" style="color: rgba(255,255,255,0.9);">AI正在分析您的穿搭需求...</text>
-    <text class="text-caption mt-2" style="color: rgba(255,255,255,0.5);">正在匹配您的衣柜单品</text>
-  </view>
-
-  <!-- Item Detail Bottom Sheet -->
-  <view wx:if="{{showItemDetailSheet}}" class="bs-overlay-item" bindtap="hideItemDetail">
-    <view class="bs-sheet bs-sheet-item {{showItemDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
-      <!-- Drag Handle -->
-      <view class="bs-drag-handle" bindtap="hideItemDetail">
-        <view class="bs-drag-bar"></view>
-      </view>
-
-      <!-- Header -->
-      <view class="bs-header">
-        <view bindtap="hideItemDetail" class="bs-header-btn">
-          <text class="bs-header-btn-icon">✕</text>
-        </view>
-      </view>
-
-      <!-- Content -->
-      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
-        <!-- Photo -->
-        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
-          <view class="bs-photo-carousel">
-            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
-          </view>
-        </view>
-
-        <!-- Info -->
-        <view class="bs-info-area" wx:if="{{detailItem}}">
-          <text class="bs-title">{{detailItem.name}}</text>
-          <text class="bs-desc">{{detailItem.category}} · {{detailItem.subCategory || detailItem.subcategory || ''}} · {{detailItem.style}}</text>
-        </view>
-
-        <!-- Tags -->
-        <view class="bs-tags-area" wx:if="{{detailItem}}">
-          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
-            <text class="bs-tag-text">{{item}}</text>
-          </view>
-        </view>
-
-        <!-- Colors -->
-        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
-          <text class="bs-colors-label">颜色</text>
-          <view class="bs-colors-row">
-            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
-          </view>
-        </view>
-
-        <!-- Location -->
-        <view class="bs-location-area" wx:if="{{detailItem}}">
-          <view class="bs-location-label-text">位置信息</view>
-          <view class="bs-location-pills">
-            <view class="bs-location-pill">
-              <text class="bs-location-pill-label">衣柜</text>
-              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
-            </view>
-            <view class="bs-location-pill">
-              <text class="bs-location-pill-label">分区</text>
-              <text class="bs-location-pill-value">{{detailZoneName}}</text>
-            </view>
-          </view>
-        </view>
-
-        <view style="height: 20px;"></view>
-      </scroll-view>
-
-      <!-- Bottom Actions -->
-      <view class="bs-action-bar">
-        <view class="bs-close-btn" bindtap="hideItemDetail">
-          <text class="bs-close-text">关闭</text>
-        </view>
-      </view>
-    </view>
-  </view>
+  <!-- Hidden Canvas for Image Compression -->
+  <canvas type="2d" id="compressCanvas" style="position: fixed; left: -9999px; top: 0; width: 1024px; height: 1024px;"></canvas>
 </view>

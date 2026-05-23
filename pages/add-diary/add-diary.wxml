@@ -1,87 +1,176 @@
 <view class="container add-diary-page" data-theme="{{__theme}}">
-  <view class="safe-header">
-    <view class="header-inner">
-      <view bindtap="cancel" class="w-9 h-9 rounded-full flex items-center justify-center" style="background: var(--bg); box-shadow: 4px 4px 10px var(--shadow-dark);"><text style="color: var(--text-primary); font-size: 18px;">&lt;</text></view>
-      <text class="header-title">添加日记</text>
-      <view class="header-placeholder"></view>
+  <!-- Glass Navigation Header -->
+  <view class="glass-nav">
+    <view class="nav-inner">
+      <view bindtap="cancel" class="nav-back">
+        <image src="/images/icon-back.png" class="nav-back-icon" />
+      </view>
+      <text class="nav-title">添加穿搭</text>
+      <view class="nav-placeholder"></view>
     </view>
   </view>
-  <scroll-view scroll-y class="flex-1 px-4 pb-6" style="height: calc(100vh - 94px);">
-    <!-- Photos -->
-    <view class="mb-4">
-      <text class="text-caption block mb-2" style="color: var(--text-secondary);">搭配照片 {{photos.length > 0 ? '(' + photos.length + '/3)' : ''}}</text>
-      <view wx:if="{{photos.length === 0}}" bindtap="choosePhoto" class="w-full rounded-2xl flex flex-col items-center justify-center gap-3" style="height: 200px; border: 2px dashed var(--border); background: var(--card-bg); box-shadow: inset 3px 3px 8px var(--shadow-inset-dark);">
-        <text style="color: var(--accent); font-size: 24px;">📷</text>
-        <text class="text-caption" style="color: var(--text-muted);">点击添加照片（最多3张）</text>
-      </view>
-      <view wx:else>
-        <view class="relative w-full rounded-2xl overflow-hidden mb-2" style="height: 220px; box-shadow: 4px 4px 12px var(--shadow-dark);">
-          <image class="w-full h-full object-cover" src="{{photos[0]}}" mode="aspectFill" />
-          <view bindtap="removePhoto" data-idx="0" class="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center" style="background: rgba(0,0,0,0.55);"><text style="color: white; font-size: 12px;">×</text></view>
-          <view class="absolute top-2 left-2 px-2 py-0_5 rounded-full text-10px" style="background: rgba(0,0,0,0.5); color: white;">1 / {{photos.length}}</view>
+
+  <scroll-view scroll-y class="form-scroll" style="height: calc(100vh - 94px - 90px); margin-top: 4px;" enhanced show-scrollbar="{{false}}">
+    <!-- Photos Area -->
+    <view class="glass-panel photo-panel" style="animation-delay: 0ms;">
+      <text class="field-label">搭配照片 <text class="field-label-hint" wx:if="{{photos.length > 0}}">· {{photos.length}}/3</text></text>
+      <!-- Has photos: grid -->
+      <view wx:if="{{photos.length > 0}}" class="photo-grid">
+        <view wx:for="{{photos}}" wx:key="*this" class="photo-thumb-wrap">
+          <image class="photo-thumb" src="{{item}}" mode="aspectFill" />
+          <view bindtap="removePhoto" data-idx="{{index}}" class="photo-thumb-remove">
+            <text class="photo-thumb-remove-x">×</text>
+          </view>
         </view>
-        <view wx:if="{{photos.length < 3}}" bindtap="choosePhoto" class="w-16 h-16 rounded-xl flex items-center justify-center" style="border: 2px dashed var(--border); background: var(--card-bg); box-shadow: inset 2px 2px 6px var(--shadow-inset-dark);"><text style="color: var(--text-muted); font-size: 18px;">+</text></view>
+        <view wx:if="{{photos.length < 3}}" bindtap="choosePhoto" class="photo-add-btn">
+          <text class="photo-add-icon">+</text>
+        </view>
+      </view>
+      <!-- Empty state -->
+      <view wx:else bindtap="choosePhoto" class="photo-upload-empty">
+        <view class="photo-upload-icon-wrap">
+          <image src="/images/shirt.png" class="photo-upload-icon" />
+        </view>
+        <text class="photo-upload-title">上传照片（最多3张）</text>
       </view>
     </view>
+
     <!-- Name -->
-    <view class="mb-4">
-      <text class="text-caption block mb-1" style="color: var(--text-secondary);">搭配名称</text>
-      <input class="form-input" value="{{name}}" bindinput="onNameInput" placeholder="给这套搭配起个名字" />
+    <view class="glass-panel field-panel compact" style="animation-delay: 50ms;">
+      <text class="field-label">搭配名称</text>
+      <input class="glass-input compact-input" value="{{name}}" bindinput="onNameInput" placeholder="给这套搭配起个名字" placeholder-class="input-placeholder" />
     </view>
+
     <!-- Style -->
-    <view class="mb-4">
-      <text class="text-caption block mb-1" style="color: var(--text-secondary);">风格标签</text>
-      <view class="flex flex-wrap gap-2">
-        <view wx:for="{{styleOptions}}" wx:key="*this" bindtap="selectStyle" data-s="{{item}}" class="style-pill {{style === item ? 'style-pill-active' : ''}}">{{item}}</view>
+    <view class="glass-panel field-panel compact" style="animation-delay: 100ms;">
+      <text class="field-label">风格标签</text>
+      <view class="tag-wrap compact-tags">
+        <view wx:for="{{styleOptions}}" wx:key="*this" bindtap="selectStyle" data-s="{{item}}" class="tag-pill {{style === item ? 'tag-pill-active' : ''}}">{{item}}</view>
       </view>
     </view>
+
     <!-- Note -->
-    <view class="mb-4">
-      <text class="text-caption block mb-1" style="color: var(--text-secondary);">备注</text>
-      <textarea class="form-input" value="{{note}}" bindinput="onNoteInput" placeholder="记录心情、场合..." rows="3" />
+    <view class="glass-panel field-panel compact" style="animation-delay: 150ms;">
+      <text class="field-label">备注 <text class="field-label-hint">选填</text></text>
+      <textarea class="glass-textarea compact-textarea" value="{{note}}" bindinput="onNoteInput" placeholder="记录心情、场合…" placeholder-class="input-placeholder" maxlength="200" />
     </view>
+
     <!-- Items -->
-    <view class="mb-4">
-      <text class="text-caption block mb-1" style="color: var(--text-secondary);">单品 {{selectedItemNames.length > 0 ? '(' + selectedItemNames.length + ')' : ''}}</text>
-      <view bindtap="toggleItemPicker" class="form-input">
-        <text wx:if="{{selectedItemNames.length === 0}}" style="color: var(--text-muted);">点击添加单品...</text>
-        <view wx:else class="flex flex-wrap gap-2">
-          <text wx:for="{{selectedItemNames}}" wx:key="*this" class="pill">{{item}}</text>
+    <view class="glass-panel field-panel compact" style="animation-delay: 200ms;">
+      <text class="field-label">关联单品 <text class="field-label-hint" wx:if="{{selectedItemNames.length > 0}}">· {{selectedItemNames.length}}</text></text>
+      <!-- 已选单品列表 -->
+      <view wx:if="{{selectedItems.length > 0}}" class="selected-items-list">
+        <view wx:for="{{selectedItems}}" wx:key="id" class="selected-item-tag">
+          <text class="selected-item-name">{{item.name}}</text>
+          <text class="selected-item-category">{{item.category}}</text>
+          <view bindtap="removeSelectedItem" data-id="{{item.id}}" class="selected-item-remove">
+            <text class="selected-item-remove-x">×</text>
+          </view>
         </view>
       </view>
+      <view bindtap="toggleItemPicker" class="glass-dropdown compact-dropdown">
+        <text class="dropdown-text {{selectedItemNames.length > 0 ? 'dropdown-text-active' : ''}}">{{selectedItemNames.length > 0 ? '继续添加单品…' : '点击添加单品…'}}</text>
+        <image src="/images/chevron-down.png" class="dropdown-arrow" />
+      </view>
     </view>
-    <!-- Buttons -->
-    <view class="flex gap-3 mt-6">
-      <button class="btn-cancel flex-1" bindtap="cancel">取消</button>
-      <button class="btn-confirm flex-1" bindtap="submit">确认</button>
-    </view>
+
+    <!-- Bottom spacing -->
+    <view style="height: 80px;"></view>
   </scroll-view>
 
-  <!-- Item Picker -->
-  <view wx:if="{{showItemPicker}}" class="overlay flex items-end justify-center">
-    <view class="bottom-sheet w-full" catchtap="preventBubble">
-      <view class="flex items-center justify-between mb-3">
-        <text class="text-heading">选择单品</text>
-        <view bindtap="toggleItemPicker" class="w-7 h-7 rounded-full flex items-center justify-center" style="background: var(--card-bg); box-shadow: 3px 3px 8px var(--shadow-dark);"><text style="color: var(--text-muted); font-size: 12px;">×</text></view>
-      </view>
-      <view class="relative mb-3 rounded-xl flex items-center px-3 py-2" style="background: var(--bg); box-shadow: inset 3px 3px 8px var(--shadow-inset-dark);">
-        <text style="color: var(--text-muted); margin-right: 6px;">🔍</text>
-        <input class="flex-1 text-body" style="color: var(--text-primary);" placeholder="搜索衣物..." value="{{itemSearchQuery}}" bindinput="onItemSearch" />
-      </view>
-      <view wx:if="{{itemPickerList.length === 0}}" class="text-center py-8">
-        <text style="font-size: 24px; color: var(--accent);">👕</text>
-        <text class="text-body block" style="color: var(--text-muted);">暂无衣物</text>
-      </view>
-      <view wx:else class="grid grid-cols-2 gap-2">
-        <view wx:for="{{itemPickerList}}" wx:key="id" bindtap="toggleItem" data-id="{{item.id}}" class="item-card {{item.selected ? 'item-card-selected' : ''}}">
-          <view class="w-full aspect-square overflow-hidden"><image class="w-full h-full object-cover" src="{{item.image}}" mode="aspectFill" /></view>
-          <view class="px-2 py-2" style="background: {{item.selected ? 'var(--accent-soft)' : 'var(--card-bg)'}};">
-            <text class="text-10px font-medium truncate block" style="color: {{item.selected ? 'var(--accent)' : 'var(--text-primary)'}};">{{item.name}}</text>
-          </view>
-          <view wx:if="{{item.selected}}" class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center" style="background: var(--accent);"><text style="color: white; font-size: 10px;">√</text></view>
+  <!-- Fixed Bottom Confirm Button -->
+  <view class="bottom-bar">
+    <button class="btn-gradient" bindtap="submit">
+      <text>确认添加</text>
+    </button>
+  </view>
+
+  <!-- ===== Bottom Sheet: Item Picker ===== -->
+  <view wx:if="{{showItemPicker}}" class="sheet-overlay" bindtap="toggleItemPicker">
+    <view class="sheet-panel" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">选择单品</text>
+        <view bindtap="toggleItemPicker" class="sheet-close">
+          <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
         </view>
       </view>
-      <button class="btn-confirm w-full mt-4" bindtap="toggleItemPicker">完成 {{selectedItemNames.length > 0 ? '(' + selectedItemNames.length + ')' : ''}}</button>
+      <view class="sheet-body">
+        <!-- Search -->
+        <view class="item-picker-search">
+          <text class="item-picker-search-icon">🔍</text>
+          <input class="item-picker-search-input" placeholder="搜索衣物…" value="{{itemSearchQuery}}" bindinput="onItemSearch" />
+        </view>
+        <!-- Empty -->
+        <view wx:if="{{itemPickerList.length === 0}}" class="item-picker-empty">
+          <text class="item-picker-empty-icon">👕</text>
+          <text class="item-picker-empty-text">暂无衣物</text>
+        </view>
+        <!-- Grid -->
+        <view wx:else class="item-picker-grid">
+          <view wx:for="{{itemPickerList}}" wx:key="id" bindtap="toggleItem" data-id="{{item.id}}" class="item-picker-card {{item.selected ? 'item-picker-card-selected' : ''}}">
+            <view class="item-picker-img-wrap">
+              <image class="item-picker-img" src="{{item.image}}" mode="aspectFill" />
+            </view>
+            <view class="item-picker-info">
+              <text class="item-picker-name">{{item.name}}</text>
+              <view class="item-picker-meta">
+                <text class="item-picker-category">{{item.category}}</text>
+                <text wx:if="{{item.subCategory}}" class="item-picker-subcategory">{{item.subCategory}}</text>
+              </view>
+            </view>
+            <view wx:if="{{item.selected}}" class="item-picker-check">
+              <text style="color: white; font-size: 10px;">✓</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="sheet-footer">
+        <button class="btn-gradient btn-gradient-sm" bindtap="toggleItemPicker">完成 {{selectedItemNames.length > 0 ? '(' + selectedItemNames.length + ')' : ''}}</button>
+      </view>
     </view>
   </view>
+
+  <!-- ===== Image Cropper Overlay ===== -->
+  <view wx:if="{{showCropper}}" class="cropper-overlay">
+    <view class="cropper-header">
+      <view bindtap="cancelCrop" class="cropper-back">
+        <text class="cropper-back-x">×</text>
+      </view>
+      <text class="cropper-title">裁剪照片</text>
+      <view bindtap="confirmCrop" class="cropper-done">
+        <text class="cropper-done-text">完成</text>
+      </view>
+    </view>
+    <view class="cropper-body">
+      <view class="cropper-container" style="height: {{cropContainerH}}px;"
+            catchtouchstart="onCropTouchStart"
+            catchtouchmove="onCropTouchMove"
+            catchtouchend="onCropTouchEnd">
+        <image class="cropper-bg-image" src="{{cropSrc}}" style="width: {{cropImgW}}px; height: {{cropImgH}}px; left: {{cropImgX}}px; top: {{cropImgY}}px;" />
+        <view class="cropper-frame" style="width: {{cropFrameW}}px; height: {{cropFrameH}}px; left: {{cropFrameX}}px; top: {{cropFrameY}}px;">
+          <view class="cropper-corner cropper-corner-tl"></view>
+          <view class="cropper-corner cropper-corner-tr"></view>
+          <view class="cropper-corner cropper-corner-bl"></view>
+          <view class="cropper-corner cropper-corner-br"></view>
+          <view class="cropper-grid-h"></view>
+          <view class="cropper-grid-v"></view>
+          <view class="cropper-edge cropper-edge-t" data-edge="t"></view>
+          <view class="cropper-edge cropper-edge-r" data-edge="r"></view>
+          <view class="cropper-edge cropper-edge-b" data-edge="b"></view>
+          <view class="cropper-edge cropper-edge-l" data-edge="l"></view>
+          <view class="cropper-handle cropper-handle-tl" data-handle="tl"></view>
+          <view class="cropper-handle cropper-handle-tr" data-handle="tr"></view>
+          <view class="cropper-handle cropper-handle-bl" data-handle="bl"></view>
+          <view class="cropper-handle cropper-handle-br" data-handle="br"></view>
+        </view>
+      </view>
+      <view class="cropper-hint-row">
+        <text class="cropper-hint">拖动移动，捏合缩放，拖边调整</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Hidden canvas for image cropping -->
+  <canvas canvas-id="diaryCropCanvas" class="crop-canvas"></canvas>
 </view>

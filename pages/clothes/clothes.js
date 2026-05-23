@@ -94,7 +94,7 @@ Page({
   },
   selectSubCategory(e) {
     const sub = e.currentTarget.dataset.sub;
-    this.setData({ activeSubCategory: sub, sidebarOpen: false });
+    this.setData({ activeSubCategory: sub, sidebarOpen: false, expandedCategory: '' });
     this.filterItems();
   },
   onSearch(e) { this.setData({ searchQuery: e.detail.value }); this.filterItems(); },

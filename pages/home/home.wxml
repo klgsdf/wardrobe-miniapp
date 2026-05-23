@@ -115,7 +115,7 @@
     <view wx:if="{{diaryOutfits.length > 0}}" class="diary-scroll-wrap">
       <scroll-view class="diary-scroll-area" scroll-x="true" enable-flex="true">
         <view class="diary-card-list">
-          <view wx:for="{{diaryOutfits}}" wx:key="id" class="diary-card" bindtap="goToDiaryDetail" data-id="{{item.id}}">
+          <view wx:for="{{diaryOutfits}}" wx:key="id" class="diary-card" bindtap="showDiaryDetail" data-id="{{item.id}}">
             <view class="diary-card-img-wrap">
               <image class="diary-card-img" src="{{item.photos[0] || '/images/outfit-thumb-1.jpg'}}" mode="aspectFill" />
             </view>
@@ -150,4 +150,146 @@
 
   <!-- Toast -->
   <view wx:if="{{toastMessage}}" class="toast animate-toast-in">{{toastMessage}}</view>
+
+  <!-- Diary Detail Modal - 复刻日记页弹窗 -->
+  <view wx:if="{{showDetailSheet}}" class="bs-overlay" bindtap="hideDiaryDetail">
+    <view class="bs-sheet {{showDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <!-- Drag Handle -->
+      <view class="bs-drag-handle" bindtap="hideDiaryDetail">
+        <view class="bs-drag-bar"></view>
+      </view>
+
+      <!-- Header: Close + Share -->
+      <view class="bs-header">
+        <view bindtap="hideDiaryDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+        <view bindtap="shareDiaryEntry" class="bs-header-btn">
+          <text class="bs-header-btn-icon" style="font-size: 16px;">↗</text>
+        </view>
+      </view>
+
+      <!-- Content -->
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- Photo Carousel -->
+        <view class="bs-photo-wrap" wx:if="{{detailEntry && detailEntry.photos && detailEntry.photos.length > 0}}">
+          <scroll-view class="bs-photo-carousel" scroll-x enhanced show-scrollbar="{{false}}" scroll-snap-type="x mandatory">
+            <view wx:for="{{detailEntry.photos}}" wx:key="*this" class="bs-photo-item" style="scroll-snap-align: center;">
+              <image class="bs-photo-img" src="{{item}}" mode="aspectFill" />
+            </view>
+          </scroll-view>
+          <!-- Pagination Dots -->
+          <view class="bs-photo-dots" wx:if="{{detailEntry.photos.length > 1}}">
+            <view wx:for="{{detailEntry.photos}}" wx:key="*this" class="bs-photo-dot {{index === 0 ? 'bs-photo-dot-active' : ''}}"></view>
+          </view>
+        </view>
+
+        <!-- Title & Meta -->
+        <view class="bs-info-area" wx:if="{{detailEntry}}">
+          <text class="bs-title">{{detailEntry.name}}</text>
+          <text class="bs-desc">{{detailEntry.note || ''}}{{detailEntry.weather ? ' · ' + detailEntry.weather : ''}}{{detailEntry.date ? ' · ' + detailEntry.date : ''}}</text>
+        </view>
+
+        <!-- Clothing Items -->
+        <view class="bs-items-area" wx:if="{{detailItems.length > 0}}">
+          <view wx:for="{{detailItems}}" wx:key="id" class="bs-item-card" bindtap="showItemDetailFromSheet" data-id="{{item.id}}">
+            <image class="bs-item-img" src="{{item.image}}" mode="aspectFill" />
+            <view class="bs-item-info">
+              <text class="bs-item-name">{{item.name}}</text>
+              <text class="bs-item-meta">{{item.category}} · {{item.subcategory || item.subCategory || ''}}</text>
+            </view>
+            <view class="bs-item-tag">
+              <text class="bs-item-tag-text">{{item.category}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <!-- Bottom Actions -->
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="editDiaryEntry">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteDiaryEntry">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- Item Detail Modal -->
+  <view wx:if="{{showItemDetailSheet}}" class="bs-overlay-item" bindtap="hideItemDetail">
+    <view class="bs-sheet bs-sheet-item {{showItemDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <!-- Header -->
+      <view class="bs-header">
+        <view bindtap="hideItemDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+      </view>
+
+      <!-- Content -->
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <!-- Photo -->
+        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
+          <view class="bs-photo-carousel">
+            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+          </view>
+        </view>
+
+        <!-- Info -->
+        <view class="bs-info-area" wx:if="{{detailItem}}">
+          <text class="bs-title">{{detailItem.name}}</text>
+          <text class="bs-desc">{{detailItem.category}} · {{detailItem.subCategory || detailItem.subcategory || ''}} · {{detailItem.style}}</text>
+        </view>
+
+        <!-- Tags -->
+        <view class="bs-tags-area" wx:if="{{detailItem}}">
+          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+            <text class="bs-tag-text">{{item}}</text>
+          </view>
+        </view>
+
+        <!-- Colors -->
+        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
+          <text class="bs-colors-label">颜色</text>
+          <view class="bs-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+          </view>
+        </view>
+
+        <!-- Location -->
+        <view class="bs-location-area" wx:if="{{detailItem}}">
+          <view class="bs-location-label-text">位置信息</view>
+          <view class="bs-location-pills">
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">衣柜</text>
+              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+            </view>
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">分区</text>
+              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <!-- Bottom Actions -->
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="editItemDetail">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteItemDetail">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>

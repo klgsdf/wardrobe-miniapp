@@ -1,0 +1,192 @@
+<view class="container ai-page" data-theme="{{__theme}}">
+  <!-- Background Image -->
+  <view class="bg-image-wrap">
+    <image class="bg-image" src="/images/bg-ai-outfit.jpg" mode="aspectFill" />
+    <view class="bg-overlay"></view>
+  </view>
+
+  <!-- Header -->
+  <view class="ai-header">
+    <view class="header-back" bindtap="goHome">
+      <image src="/images/icon-back.png" class="header-back-icon" />
+    </view>
+  </view>
+
+  <!-- Title Section -->
+  <view class="ai-title-section">
+    <text class="ai-title">穿搭推荐结果</text>
+    <view class="ai-subtitle">
+      <image src="/images/sparkles.png" class="ai-subtitle-icon" />
+      <text>AI 智能生成</text>
+    </view>
+  </view>
+
+  <!-- Main Content -->
+  <scroll-view scroll-y class="ai-scroll" enhanced show-scrollbar="{{false}}">
+
+    <!-- AI Image Analysis Result -->
+    <view wx:if="{{imageAnalysisResult}}" class="result-section mx-4">
+      <view class="glass-card analysis-result-card">
+        <view class="result-header">
+          <view class="result-ai-badge">
+            <image src="/images/sparkles.png" class="result-ai-icon" />
+            <text>图片分析结果</text>
+          </view>
+        </view>
+        <view class="analysis-result-content">
+          <view wx:if="{{imageAnalysisResult.style}}" class="analysis-item">
+            <text class="analysis-label">风格识别</text>
+            <text class="analysis-value">{{imageAnalysisResult.style}}</text>
+          </view>
+          <view wx:if="{{imageAnalysisResult.colors && imageAnalysisResult.colors.length > 0}}" class="analysis-item">
+            <text class="analysis-label">颜色识别</text>
+            <view class="analysis-colors">
+              <view wx:for="{{imageAnalysisResult.colors}}" wx:key="*this" class="analysis-color-dot" style="background: {{item}};"></view>
+            </view>
+          </view>
+          <view wx:if="{{imageAnalysisResult.categories && imageAnalysisResult.categories.length > 0}}" class="analysis-item">
+            <text class="analysis-label">品类识别</text>
+            <view class="analysis-tags">
+              <view wx:for="{{imageAnalysisResult.categories}}" wx:key="*this" class="analysis-mini-tag">{{item}}</view>
+            </view>
+          </view>
+          <view wx:if="{{imageAnalysisResult.description}}" class="analysis-item">
+            <text class="analysis-label">详细描述</text>
+            <text class="analysis-desc">{{imageAnalysisResult.description}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Single Recommendation Result -->
+    <view wx:if="{{recommendation}}" class="result-section mx-4 mt-4">
+      <view class="result-card">
+        <!-- Result Header -->
+        <view class="result-header">
+          <view class="result-ai-badge">
+            <image src="/images/sparkles.png" class="result-ai-icon" />
+            <text>{{recommendation.name || 'AI 智能推荐'}}</text>
+          </view>
+          <view class="result-match-badge" style="background: {{recommendation.rankBg}};">
+            <text style="color: {{recommendation.rankColor}};">匹配度 {{recommendation.confidence}}%</text>
+          </view>
+        </view>
+
+        <!-- Result Description -->
+        <text class="result-desc">{{recommendation.desc}}</text>
+
+        <!-- Result Tags -->
+        <view class="result-tags">
+          <view wx:for="{{recommendation.tags}}" wx:key="*this" class="result-tag">{{item}}</view>
+        </view>
+      </view>
+
+      <!-- Category Breakdown -->
+      <view wx:if="{{recommendation.categories && recommendation.categories.length > 0}}" class="items-breakdown">
+        <view class="breakdown-header">
+          <image src="/images/grid.png" class="breakdown-icon" />
+          <text class="breakdown-title">推荐单品类别</text>
+        </view>
+
+        <view wx:for="{{recommendation.categories}}" wx:key="category" class="category-group">
+          <view class="category-header">
+            <text class="category-name">{{item.category}}</text>
+          </view>
+          <view wx:if="{{item.matchedItem}}" class="item-row" bindtap="showItemDetail" data-id="{{item.matchedItem.id}}">
+            <image class="item-row-img" src="{{item.matchedItem.image}}" mode="aspectFill" />
+            <view class="item-row-info">
+              <view class="item-row-name-wrap">
+                <text class="item-row-name">{{item.matchedItem.name}}</text>
+                <view class="item-row-category">{{item.matchedItem.category}}</view>
+              </view>
+              <view class="item-row-meta">
+                <text class="item-row-status">✓ 已匹配</text>
+              </view>
+            </view>
+            <image src="/images/chevron-right.png" class="item-row-arrow" />
+          </view>
+          <view wx:else class="no-match-row">
+            <text class="no-match-text">没有匹配单品</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Bottom Actions -->
+      <view class="result-actions">
+        <button class="btn-retry" bindtap="goRetry">
+          <image src="/images/sparkles.png" class="btn-retry-icon" />
+          <text>再试一次</text>
+        </button>
+        <button class="btn-home" bindtap="goHome">
+          <text>返回首页</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- Spacer -->
+    <view style="height: 40px;"></view>
+  </scroll-view>
+
+  <!-- Item Detail Bottom Sheet -->
+  <view wx:if="{{showItemDetailSheet}}" class="bs-overlay-item" bindtap="hideItemDetail">
+    <view class="bs-sheet bs-sheet-item {{showItemDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <view class="bs-drag-handle" bindtap="hideItemDetail">
+        <view class="bs-drag-bar"></view>
+      </view>
+
+      <view class="bs-header">
+        <view bindtap="hideItemDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+      </view>
+
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
+          <view class="bs-photo-carousel">
+            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+          </view>
+        </view>
+
+        <view class="bs-info-area" wx:if="{{detailItem}}">
+          <text class="bs-title">{{detailItem.name}}</text>
+          <text class="bs-desc">{{detailItem.category}} · {{detailItem.subCategory || detailItem.subcategory || ''}} · {{detailItem.style}}</text>
+        </view>
+
+        <view class="bs-tags-area" wx:if="{{detailItem}}">
+          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+            <text class="bs-tag-text">{{item}}</text>
+          </view>
+        </view>
+
+        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
+          <text class="bs-colors-label">颜色</text>
+          <view class="bs-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+          </view>
+        </view>
+
+        <view class="bs-location-area" wx:if="{{detailItem}}">
+          <view class="bs-location-label-text">位置信息</view>
+          <view class="bs-location-pills">
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">衣柜</text>
+              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+            </view>
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">分区</text>
+              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view style="height: 20px;"></view>
+      </scroll-view>
+
+      <view class="bs-action-bar">
+        <view class="bs-close-btn" bindtap="hideItemDetail">
+          <text class="bs-close-text">关闭</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

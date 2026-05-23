@@ -11,6 +11,12 @@ Page({
     zoneDesc: '',
     itemCount: 0,
     zoneItems: [],
+    masonryLeft: [],
+    masonryRight: [],
+    showItemDetailSheet: false,
+    detailItem: null,
+    detailWardrobeName: '',
+    detailZoneName: '',
   },
 
   onLoad(options) {
@@ -55,6 +61,85 @@ Page({
       itemCount: zoneItems.length,
       zoneItems,
     });
+    this.buildMasonry(zoneItems);
+  },
+
+  buildMasonry(items) {
+    const left = [], right = [];
+    items.forEach((item, idx) => idx % 2 === 0 ? left.push(item) : right.push(item));
+    this.setData({ masonryLeft: left, masonryRight: right });
+  },
+
+  showItemDetail(e) {
+    const targetId = e.currentTarget.dataset.id;
+    if (!targetId) return;
+    const state = app.getState();
+    const clothingItems = state.clothingItems || [];
+    let item = null;
+    for (var i = 0; i < clothingItems.length; i++) {
+      if (clothingItems[i].id === targetId) {
+        item = clothingItems[i];
+        break;
+      }
+    }
+    if (!item) {
+      wx.showToast({ title: '未找到单品详情', icon: 'none' });
+      return;
+    }
+    let wardrobeName = '未分配';
+    let zoneName = '未分配';
+    if (item.wardrobeId) {
+      const wardrobe = state.wardrobes.find(function(w) { return w.id === item.wardrobeId; });
+      if (wardrobe) {
+        wardrobeName = wardrobe.name;
+        if (item.zoneId && wardrobe.zones) {
+          const zone = wardrobe.zones.find(function(z) { return z.id === item.zoneId; });
+          if (zone) zoneName = zone.name;
+        }
+      }
+    }
+    this.setData({
+      detailItem: item,
+      detailWardrobeName: wardrobeName,
+      detailZoneName: zoneName,
+      showItemDetailSheet: true,
+    });
+  },
+
+  hideItemDetail() {
+    this.setData({ showItemDetailSheet: false });
+    setTimeout(function() {
+      this.setData({ detailItem: null, detailWardrobeName: '', detailZoneName: '' });
+    }.bind(this), 300);
+  },
+
+  editItemDetail() {
+    const item = this.data.detailItem;
+    if (!item) return;
+    this.hideItemDetail();
+    wx.navigateTo({ url: `/pages/add-clothes/add-clothes?id=${item.id}` });
+  },
+
+  deleteItemDetail() {
+    const item = this.data.detailItem;
+    if (!item) return;
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除「${item.name}」吗？删除后不可恢复。`,
+      confirmColor: '#C17C74',
+      success: (res) => {
+        if (res.confirm) {
+          app.deleteClothingItem(item.id);
+          this.hideItemDetail();
+          this.loadData();
+          wx.showToast({ title: '已删除', icon: 'success' });
+        }
+      },
+    });
+  },
+
+  preventBubble() {
+    // 阻止事件冒泡，防止点击弹窗内容时关闭弹窗
   },
 
   navigateBack() {

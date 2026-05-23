@@ -16,6 +16,9 @@ App({
       this.globalData.state = getDefaultState();
     }
 
+    // 确保"未分区"衣柜存在
+    this.ensureUnassignedWardrobe();
+
     // 获取设备信息（兼容新API）
     const windowInfo = wx.getWindowInfo();
     const deviceInfo = wx.getDeviceInfo();
@@ -25,6 +28,28 @@ App({
 
     // 应用当前主题
     this.applyTheme(this.globalData.state.theme);
+  },
+
+  /** 确保"未分区"衣柜存在 */
+  ensureUnassignedWardrobe() {
+    const state = this.globalData.state;
+    const unassignedExists = state.wardrobes.some(w => w.id === 'unassigned');
+    
+    if (!unassignedExists) {
+      const unassignedWardrobe = {
+        id: 'unassigned',
+        name: '未分区',
+        description: '存放未分配位置的衣物',
+        type: '系统',
+        icon: 'Inbox',
+        zoneCount: 0,
+        itemCount: 0,
+        zones: [],
+        isSystem: true // 标记为系统衣柜，不可删除/改名
+      };
+      const wardrobes = [unassignedWardrobe, ...state.wardrobes];
+      this.setState({ wardrobes });
+    }
   },
 
   /** 应用主题到页面 */
@@ -108,8 +133,39 @@ App({
 
   /** 删除衣柜 */
   deleteWardrobe(id) {
+    // 不允许删除"未分区"衣柜
+    if (id === 'unassigned') {
+      wx.showToast({ title: '系统衣柜不可删除', icon: 'none' });
+      return;
+    }
     const wardrobes = this.globalData.state.wardrobes.filter(w => w.id !== id);
     this.setState({ wardrobes });
+  },
+
+  /** 迁移衣柜下的所有衣物到未分区衣柜 */
+  migrateClothesToUnassigned(wardrobeId) {
+    const state = this.globalData.state;
+    const clothingItems = state.clothingItems.map(item => {
+      // 如果衣物属于被删除的衣柜，迁移到未分区
+      if (item.wardrobeId === wardrobeId) {
+        return { ...item, wardrobeId: 'unassigned', zoneId: '' };
+      }
+      return item;
+    });
+    this.setState({ clothingItems });
+  },
+
+  /** 迁移分区下的所有衣物到未分区衣柜 */
+  migrateClothesFromZoneToUnassigned(wardrobeId, zoneId) {
+    const state = this.globalData.state;
+    const clothingItems = state.clothingItems.map(item => {
+      // 如果衣物属于被删除的分区，迁移到未分区
+      if (item.wardrobeId === wardrobeId && item.zoneId === zoneId) {
+        return { ...item, wardrobeId: 'unassigned', zoneId: '' };
+      }
+      return item;
+    });
+    this.setState({ clothingItems });
   },
 
   /** 添加分区 */
@@ -123,6 +179,11 @@ App({
 
   /** 删除分区 */
   deleteZone(wardrobeId, zoneId) {
+    // 不允许删除"未分区"衣柜的分区
+    if (wardrobeId === 'unassigned') {
+      wx.showToast({ title: '系统衣柜不可操作', icon: 'none' });
+      return;
+    }
     const wardrobes = this.globalData.state.wardrobes.map(w => {
       if (w.id !== wardrobeId) return w;
       return { ...w, zones: w.zones.filter(z => z.id !== zoneId), zoneCount: w.zoneCount - 1 };

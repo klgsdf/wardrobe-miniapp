@@ -1,129 +1,194 @@
 <view class="container add-page" data-theme="{{__theme}}">
-  <!-- Header -->
-  <view class="safe-header">
-    <view class="header-inner">
-      <view bindtap="cancel" class="back-btn">
-        <image src="/images/icon-back.png" class="back-icon" />
+  <!-- Glass Navigation Header -->
+  <view class="glass-nav">
+    <view class="nav-inner">
+      <view bindtap="cancel" class="nav-back">
+        <image src="/images/icon-back.png" class="nav-back-icon" />
       </view>
-      <text class="header-title">添加单品</text>
-      <view class="header-placeholder"></view>
+      <text class="nav-title">添加单品</text>
+      <view class="nav-placeholder"></view>
     </view>
   </view>
 
-  <scroll-view scroll-y class="form-scroll" style="height: calc(100vh - 94px - 90px); margin-top: 4px;">
-    <!-- Photo Upload Row -->
-    <view class="photo-row">
-      <view bindtap="chooseImage" class="photo-box {{image ? 'photo-box-has-image' : ''}}">
-        <image wx:if="{{image}}" class="photo-image" src="{{image}}" mode="aspectFill" />
-        <view wx:else class="photo-placeholder">
-          <view class="photo-icon-wrap">
-            <image src="/images/shirt.png" class="photo-icon" />
+  <scroll-view scroll-y class="form-scroll" style="height: calc(100vh - 94px - 90px); margin-top: 4px;" enhanced show-scrollbar="{{false}}">
+    <!-- Photo Upload + AI Row -->
+    <view class="glass-panel photo-ai-row" style="animation-delay: 0ms;">
+      <view bindtap="chooseImage" class="photo-upload-area {{image ? 'has-image' : ''}}">
+        <image wx:if="{{image}}" class="photo-preview" src="{{image}}" mode="aspectFit" />
+        <view wx:else class="photo-upload-placeholder">
+          <view class="photo-upload-icon-wrap">
+            <image src="/images/shirt.png" class="photo-upload-icon" />
           </view>
-          <text class="photo-text">拍照</text>
+          <text class="photo-upload-title">上传照片</text>
         </view>
       </view>
-      <view bindtap="chooseImage" class="photo-box photo-box-album {{image ? 'photo-box-has-image' : ''}}">
-        <image wx:if="{{image}}" class="photo-image" src="{{image}}" mode="aspectFill" />
-        <view wx:else class="photo-placeholder">
-          <view class="photo-icon-wrap">
-            <text class="album-icon">↑</text>
-          </view>
-          <text class="photo-text">相册</text>
+      <view bindtap="{{image ? 'aiRecognize' : ''}}" class="ai-liquid-btn {{image ? '' : 'ai-liquid-btn-disabled'}}">
+        <view class="ai-liquid-shine"></view>
+        <view class="ai-liquid-blob ai-liquid-blob-1"></view>
+        <view class="ai-liquid-blob ai-liquid-blob-2"></view>
+        <view class="ai-liquid-blob ai-liquid-blob-3"></view>
+        <view class="ai-liquid-inner">
+          <image src="/images/sparkles.png" class="ai-liquid-icon" />
+          <text class="ai-liquid-text">智能识别</text>
         </view>
-      </view>
-      <view wx:if="{{image}}" bindtap="aiRecognize" class="ai-btn">
-        <image src="/images/sparkles.png" class="ai-btn-icon" />
-        <text class="ai-btn-text">智能识别</text>
       </view>
     </view>
 
-    <!-- Name -->
-    <view class="field-group">
+    <!-- Name + Category Row -->
+    <view class="glass-panel field-panel compact" style="animation-delay: 50ms;">
       <text class="field-label">名称</text>
-      <input class="form-input inset-input" value="{{name}}" bindinput="onNameInput" placeholder="给衣物起个名字" placeholder-class="input-placeholder" />
+      <input class="glass-input compact-input" value="{{name}}" bindinput="onNameInput" placeholder="给衣物起个名字" placeholder-class="input-placeholder" />
     </view>
 
-    <!-- Category Dropdown -->
-    <view class="field-group">
+    <view class="glass-panel field-panel compact" style="animation-delay: 100ms;">
       <text class="field-label">种类</text>
-      <view bindtap="showCategoryPicker" class="dropdown-trigger">
+      <view bindtap="showCategoryPicker" class="glass-dropdown compact-dropdown">
         <text class="dropdown-text {{category ? 'dropdown-text-active' : ''}}">{{category ? category + (subCategory ? ' > ' + subCategory : '') : '选择种类'}}</text>
         <image src="/images/chevron-down.png" class="dropdown-arrow" />
       </view>
     </view>
 
-    <!-- Sub-category (shown inline when category selected) -->
-    <view class="field-group" wx:if="{{category}}">
+    <!-- Sub-category (inline when category selected) -->
+    <view class="glass-panel field-panel compact" wx:if="{{category}}" style="animation-delay: 150ms;">
       <view class="subcat-header">
         <text class="field-label">细分类别</text>
-        <text class="subcat-hint">{{category}}细分</text>
+        <text class="subcat-hint">{{category}}</text>
       </view>
-      <view class="tag-grid">
+      <view class="tag-wrap compact-tags">
         <view wx:for="{{subCategoryList}}" wx:key="*this" bindtap="selectSubCategory" data-sub="{{item}}" class="tag-pill {{subCategory === item ? 'tag-pill-active' : ''}}">{{item}}</view>
       </view>
     </view>
 
-    <!-- Color Ribbon -->
-    <view class="field-group">
-      <text class="field-label">颜色</text>
-      <view class="color-ribbon-card">
-        <view class="color-ribbon-row">
-          <view wx:for="{{colorRibbon}}" wx:key="color" bindtap="toggleColor" data-c="{{item.color}}" class="color-ribbon-item {{item.active ? 'color-ribbon-active' : ''}}">
-            <view class="color-ribbon-dot" style="background: {{item.color}}; {{item.color === '#FFFFFF' ? 'border: 1px solid var(--border);' : ''}}"></view>
-          </view>
-        </view>
-        <view class="color-ribbon-row color-ribbon-row-second">
-          <view wx:for="{{colorRibbonSecond}}" wx:key="color" bindtap="toggleColor" data-c="{{item.color}}" class="color-ribbon-item {{item.active ? 'color-ribbon-active' : ''}}">
-            <view class="color-ribbon-dot" style="background: {{item.color}};"></view>
-          </view>
+    <!-- Color Field -->
+    <view class="glass-panel field-panel compact" style="animation-delay: 200ms;">
+      <view class="field-row">
+        <text class="field-label">颜色 <text class="field-label-hint" wx:if="{{selectedColorNames}}">· {{selectedColorNames}}</text></text>
+        <view bindtap="showColorPicker" class="field-more-btn">
+          <text class="field-more-text">更多</text>
+          <image src="/images/chevron-right.png" class="field-more-icon" />
         </view>
       </view>
-      <text class="color-selected-text" wx:if="{{selectedColorNames}}">已选：{{selectedColorNames}}</text>
-    </view>
-
-    <!-- Season Dropdown -->
-    <view class="field-group">
-      <text class="field-label">季节</text>
-      <view bindtap="showSeasonPicker" class="dropdown-trigger">
-        <text class="dropdown-text {{seasons.length ? 'dropdown-text-active' : ''}}">{{seasons.length ? seasonText : '选择季节'}}</text>
-        <image src="/images/chevron-down.png" class="dropdown-arrow" />
+      <view class="color-wrap compact-colors">
+        <view wx:for="{{colorRibbon}}" wx:key="color" bindtap="toggleColor" data-c="{{item.color}}" class="color-dot-wrap {{item.active ? 'color-dot-active' : ''}}">
+          <view class="color-dot" style="background: {{item.color}}; {{item.color === '#FFFFFF' ? 'border: 1px solid rgba(0,0,0,0.1);' : ''}}"></view>
+        </view>
+        <view wx:for="{{colorRibbonSecond}}" wx:key="color" bindtap="toggleColor" data-c="{{item.color}}" class="color-dot-wrap {{item.active ? 'color-dot-active' : ''}}">
+          <view class="color-dot" style="background: {{item.color}};"></view>
+        </view>
       </view>
     </view>
 
-    <!-- Style Dropdown -->
-    <view class="field-group">
-      <text class="field-label">风格</text>
-      <view bindtap="showStylePicker" class="dropdown-trigger">
-        <text class="dropdown-text {{style ? 'dropdown-text-active' : ''}}">{{style || '选择风格'}}</text>
-        <image src="/images/chevron-down.png" class="dropdown-arrow" />
+    <!-- Season & Style Combined Row -->
+    <view class="glass-panel field-panel compact" style="animation-delay: 250ms;">
+      <text class="field-label">季节与风格</text>
+      <view class="season-style-row">
+        <view class="season-wrap compact-seasons">
+          <view wx:for="{{seasonCards}}" wx:key="name" bindtap="toggleSeason" data-s="{{item.name}}" class="season-chip {{item.active ? 'season-chip-active' : ''}}" style="background: {{item.active ? item.bg : item.bg}}; box-shadow: {{item.active ? '0 4px 12px ' + item.shadow : '0 2px 8px rgba(0,0,0,0.04)'}}; border-color: {{item.active ? 'transparent' : 'rgba(255,255,255,0.45)'}};">
+            <text class="season-chip-name" style="color: {{item.text}};">{{item.name}}</text>
+          </view>
+        </view>
+        <view bindtap="showStylePicker" class="style-dropdown-compact">
+          <text class="style-dropdown-text {{style ? 'style-dropdown-text-active' : ''}}">{{style || '风格'}}</text>
+          <image src="/images/chevron-down.png" class="style-dropdown-arrow" />
+        </view>
       </view>
     </view>
 
-    <!-- Notes -->
-    <view class="field-group">
-      <text class="field-label">备注（选填）</text>
-      <textarea class="form-textarea inset-input" value="{{notes}}" bindinput="onNotesInput" placeholder="添加一些备注信息..." placeholder-class="input-placeholder" maxlength="200" />
+    <!-- Notes Field -->
+    <view class="glass-panel field-panel compact" style="animation-delay: 300ms;">
+      <text class="field-label">备注 <text class="field-label-hint">选填</text></text>
+      <textarea class="glass-textarea compact-textarea" value="{{notes}}" bindinput="onNotesInput" placeholder="添加备注..." placeholder-class="input-placeholder" maxlength="200" />
     </view>
 
-    <!-- Bottom spacing -->
-    <view style="height: 40px;"></view>
+    <!-- Bottom spacing for fixed bar -->
+    <view style="height: 80px;"></view>
   </scroll-view>
 
   <!-- Fixed Bottom Confirm Button -->
   <view class="bottom-bar">
-    <button class="btn-confirm-full" bindtap="onConfirmTap">确认添加</button>
+    <button class="btn-gradient {{!canSubmit ? 'btn-disabled' : ''}}" bindtap="onConfirmTap">
+      <text>确认添加</text>
+    </button>
   </view>
 
-  <!-- ===== Category Picker Modal ===== -->
-  <view wx:if="{{showCategoryPicker}}" class="modal-overlay" bindtap="hideCategoryPicker">
-    <view class="modal-sheet modal-center" catchtap="preventBubble">
-      <view class="modal-header">
-        <text class="modal-title">选择种类</text>
-        <view bindtap="hideCategoryPicker" class="modal-close">
-          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+  <!-- ===== Bottom Sheet: Color Picker ===== -->
+  <view wx:if="{{showColorPicker}}" class="sheet-overlay" bindtap="hideColorPicker">
+    <view class="sheet-panel sheet-panel-tall" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">选择颜色</text>
+        <view class="sheet-header-actions">
+          <view bindtap="clearColors" class="sheet-action-btn">
+            <text class="sheet-action-text">清除</text>
+          </view>
+          <view bindtap="hideColorPicker" class="sheet-close">
+            <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
+          </view>
         </view>
       </view>
-      <view class="modal-body">
+      <view class="sheet-body">
+        <!-- Color Gradient Preview Area -->
+        <view class="color-gradient-area" catchtouchstart="onGradientTap" catchtouchmove="onGradientMove">
+          <view class="color-gradient-bg" style="background: linear-gradient(to right, #FFFFFF, {{pickerPureColor || '#00BCD4'}});"></view>
+          <view class="color-gradient-dark" style="background: linear-gradient(to bottom, transparent, #000000);"></view>
+          <view class="color-gradient-thumb" style="left: {{pickerThumbX}}%; top: {{pickerThumbY}}%;"></view>
+        </view>
+        <!-- Hue Slider -->
+        <view class="color-hue-slider-wrap">
+          <view class="color-hue-slider" catchtouchstart="onHueTap" catchtouchmove="onHueMove">
+            <view class="color-hue-track"></view>
+            <view class="color-hue-thumb" style="left: {{hueThumbLeft}}%; background: {{pickerColor || '#00BCD4'}};"></view>
+          </view>
+        </view>
+        <!-- Color Name Preview (Liquid Glass) -->
+        <view class="color-liquid-preview">
+          <view class="color-liquid-shine"></view>
+          <view class="color-liquid-blob color-liquid-blob-1" style="background: radial-gradient(circle, {{pickerColor || '#00BCD4'}}66, transparent 70%);"></view>
+          <view class="color-liquid-blob color-liquid-blob-2" style="background: radial-gradient(circle, {{pickerColor || '#00BCD4'}}44, transparent 70%);"></view>
+          <view class="color-liquid-inner">
+            <view class="color-liquid-dot" style="background: {{pickerColor || '#00BCD4'}}; {{pickerColor === '#FFFFFF' ? 'border: 1px solid rgba(0,0,0,0.1);' : ''}}"></view>
+            <text class="color-liquid-name">{{pickerColorName || '选择颜色'}}</text>
+          </view>
+        </view>
+        <!-- Confirm Button -->
+        <view class="color-confirm-wrap">
+          <button class="btn-gradient btn-gradient-sm" bindtap="confirmColorPick">确认选择</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== Bottom Sheet: Style Picker ===== -->
+  <view wx:if="{{showStylePicker}}" class="sheet-overlay" bindtap="hideStylePicker">
+    <view class="sheet-panel" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">选择风格</text>
+        <view bindtap="hideStylePicker" class="sheet-close">
+          <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
+        </view>
+      </view>
+      <view class="sheet-body">
+        <view class="style-grid">
+          <view wx:for="{{styleOptions}}" wx:key="*this" bindtap="selectStyle" data-s="{{item}}" class="style-card {{style === item ? 'style-card-active' : ''}}">
+            <text class="style-card-name">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== Bottom Sheet: Category Picker ===== -->
+  <view wx:if="{{showCategoryPicker}}" class="sheet-overlay" bindtap="hideCategoryPicker">
+    <view class="sheet-panel" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">选择种类</text>
+        <view bindtap="hideCategoryPicker" class="sheet-close">
+          <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
+        </view>
+      </view>
+      <view class="sheet-body">
         <view class="category-grid">
           <view wx:for="{{categoryList}}" wx:key="name" bindtap="selectCategory" data-cat="{{item.name}}" class="category-card {{category === item.name ? 'category-card-active' : ''}}">
             <text class="category-card-icon">{{item.icon}}</text>
@@ -134,88 +199,54 @@
     </view>
   </view>
 
-  <!-- ===== Season Picker Modal ===== -->
-  <view wx:if="{{showSeasonPicker}}" class="modal-overlay" bindtap="hideSeasonPicker">
-    <view class="modal-sheet modal-center" catchtap="preventBubble">
-      <view class="modal-header">
-        <text class="modal-title">选择季节</text>
-        <view bindtap="hideSeasonPicker" class="modal-close">
-          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+  <!-- ===== Bottom Sheet: Wardrobe & Zone Selection ===== -->
+  <view wx:if="{{showWardrobeModal}}" class="sheet-overlay">
+    <view class="sheet-panel" catchtap="preventBubble">
+      <view class="sheet-handle"></view>
+      <view class="sheet-header">
+        <text class="sheet-title">选择存放位置</text>
+        <view bindtap="hideWardrobeModal" class="sheet-close">
+          <text style="color: var(--text-muted); font-size: 18px; line-height: 1;">×</text>
         </view>
       </view>
-      <view class="modal-body">
-        <view class="season-grid">
-          <view wx:for="{{seasonCards}}" wx:key="name" bindtap="toggleSeason" data-s="{{item.name}}" class="season-card {{item.active ? 'season-card-active' : ''}}">
-            <text class="season-card-name">{{item.name}}</text>
-          </view>
-        </view>
-        <view class="modal-footer-hint">可多选</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- ===== Style Picker Modal ===== -->
-  <view wx:if="{{showStylePicker}}" class="modal-overlay" bindtap="hideStylePicker">
-    <view class="modal-sheet modal-center" catchtap="preventBubble">
-      <view class="modal-header">
-        <text class="modal-title">选择风格</text>
-        <view bindtap="hideStylePicker" class="modal-close">
-          <text style="color: var(--text-muted); font-size: 14px;">×</text>
-        </view>
-      </view>
-      <view class="modal-body">
-        <view class="style-grid">
-          <view wx:for="{{styleOptions}}" wx:key="*this" bindtap="selectStyle" data-s="{{item}}" class="style-card {{style === item ? 'style-card-active' : ''}}">
-            <text class="style-card-name">{{item}}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-  </view>
-
-  <!-- ===== Wardrobe & Zone Selection Modal (after confirm) ===== -->
-  <view wx:if="{{showWardrobeModal}}" class="modal-overlay">
-    <view class="modal-sheet modal-center" catchtap="preventBubble">
-      <view class="modal-header">
-        <text class="modal-title">选择存放位置</text>
-        <view bindtap="hideWardrobeModal" class="modal-close">
-          <text style="color: var(--text-muted); font-size: 14px;">×</text>
-        </view>
-      </view>
-      <view class="modal-body">
+      <view class="sheet-body">
         <!-- Step 1: Select Wardrobe -->
         <view wx:if="{{wardrobeStep === 'wardrobe'}}">
-          <text class="modal-section-label">选择衣柜</text>
-          <view class="wardrobe-list">
-            <view wx:for="{{wardrobes}}" wx:key="id" bindtap="selectWardrobe" data-id="{{item.id}}" class="wardrobe-card {{wardrobeId === item.id ? 'wardrobe-card-active' : ''}}">
-              <view class="wardrobe-card-info">
-                <text class="wardrobe-card-name">{{item.name}}</text>
-                <text class="wardrobe-card-desc">{{item.zoneCount}}个分区 · {{item.description}}</text>
+          <text class="sheet-section-label">选择衣柜</text>
+          <view class="select-list">
+            <view wx:for="{{wardrobes}}" wx:key="id" bindtap="selectWardrobe" data-id="{{item.id}}" class="select-card {{wardrobeId === item.id ? 'select-card-active' : ''}}">
+              <view class="select-card-info">
+                <text class="select-card-name">{{item.name}}</text>
+                <text class="select-card-desc">{{item.zoneCount}}个分区 · {{item.description}}</text>
               </view>
-              <view wx:if="{{wardrobeId === item.id}}" class="wardrobe-card-check">✓</view>
+              <view wx:if="{{wardrobeId === item.id}}" class="select-card-check">
+                <text style="color: white; font-size: 11px;">✓</text>
+              </view>
             </view>
           </view>
         </view>
         <!-- Step 2: Select Zone -->
         <view wx:if="{{wardrobeStep === 'zone'}}">
-          <view class="modal-back-row" bindtap="backToWardrobe">
-            <image src="/images/chevron-down.png" class="modal-back-icon" style="transform: rotate(90deg);" />
-            <text class="modal-back-text">{{selectedWardrobeName}}</text>
+          <view class="sheet-back-row" bindtap="backToWardrobe">
+            <image src="/images/chevron-down.png" class="sheet-back-icon" style="transform: rotate(90deg);" />
+            <text class="sheet-back-text">{{selectedWardrobeName}}</text>
           </view>
-          <text class="modal-section-label">选择分区</text>
-          <view class="zone-list">
-            <view wx:for="{{zones}}" wx:key="id" bindtap="selectZone" data-id="{{item.id}}" class="zone-card {{zoneId === item.id ? 'zone-card-active' : ''}}">
-              <view class="zone-card-info">
-                <text class="zone-card-name">{{item.name}}</text>
-                <text class="zone-card-type">{{item.type}}</text>
+          <text class="sheet-section-label">选择分区</text>
+          <view class="select-list">
+            <view wx:for="{{zones}}" wx:key="id" bindtap="selectZone" data-id="{{item.id}}" class="select-card {{zoneId === item.id ? 'select-card-active' : ''}}">
+              <view class="select-card-info">
+                <text class="select-card-name">{{item.name}}</text>
+                <text class="select-card-desc">{{item.type}}</text>
               </view>
-              <view wx:if="{{zoneId === item.id}}" class="zone-card-check">✓</view>
+              <view wx:if="{{zoneId === item.id}}" class="select-card-check">
+                <text style="color: white; font-size: 11px;">✓</text>
+              </view>
             </view>
           </view>
         </view>
       </view>
-      <view class="modal-footer" wx:if="{{wardrobeStep === 'zone'}}">
-        <button class="btn-confirm-full btn-confirm-modal" bindtap="finalSubmit">确认存放</button>
+      <view class="sheet-footer" wx:if="{{wardrobeStep === 'zone'}}">
+        <button class="btn-gradient btn-gradient-sm" bindtap="finalSubmit">确认存放</button>
       </view>
     </view>
   </view>
@@ -239,7 +270,7 @@
       <view class="ai-rec-tag" style="animation-delay:1.2s;">颜色: {{aiResult.color || '识别中...'}}</view>
       <view class="ai-rec-tag" style="animation-delay:1.8s;">风格: {{aiResult.style || '识别中...'}}</view>
     </view>
-    <view wx:if="{{aiStatus === 'success'}}" style="text-align:center;margin-bottom:12px;">
+    <view wx:if="{{aiStatus === 'success'}}" class="ai-success-wrap">
       <view class="ai-success-circle">
         <text class="ai-success-check">✓</text>
       </view>
@@ -250,4 +281,47 @@
       <text class="ai-spinner-text">AI</text>
     </view>
   </view>
+
+  <!-- ===== Image Cropper Overlay ===== -->
+  <view wx:if="{{showCropper}}" class="cropper-overlay">
+    <view class="cropper-header">
+      <view bindtap="cancelCrop" class="cropper-back">
+        <text class="cropper-back-x">×</text>
+      </view>
+      <text class="cropper-title">裁剪照片</text>
+      <view bindtap="confirmCrop" class="cropper-done">
+        <text class="cropper-done-text">完成</text>
+      </view>
+    </view>
+    <view class="cropper-body">
+      <view class="cropper-container" style="height: {{cropContainerH}}px;"
+            catchtouchstart="onCropTouchStart"
+            catchtouchmove="onCropTouchMove"
+            catchtouchend="onCropTouchEnd">
+        <image class="cropper-bg-image" src="{{cropSrc}}" style="width: {{cropImgW}}px; height: {{cropImgH}}px; left: {{cropImgX}}px; top: {{cropImgY}}px;" />
+        <view class="cropper-frame" style="width: {{cropFrameW}}px; height: {{cropFrameH}}px; left: {{cropFrameX}}px; top: {{cropFrameY}}px;">
+          <view class="cropper-corner cropper-corner-tl"></view>
+          <view class="cropper-corner cropper-corner-tr"></view>
+          <view class="cropper-corner cropper-corner-bl"></view>
+          <view class="cropper-corner cropper-corner-br"></view>
+          <view class="cropper-grid-h"></view>
+          <view class="cropper-grid-v"></view>
+          <view class="cropper-edge cropper-edge-t" data-edge="t"></view>
+          <view class="cropper-edge cropper-edge-r" data-edge="r"></view>
+          <view class="cropper-edge cropper-edge-b" data-edge="b"></view>
+          <view class="cropper-edge cropper-edge-l" data-edge="l"></view>
+          <view class="cropper-handle cropper-handle-tl" data-handle="tl"></view>
+          <view class="cropper-handle cropper-handle-tr" data-handle="tr"></view>
+          <view class="cropper-handle cropper-handle-bl" data-handle="bl"></view>
+          <view class="cropper-handle cropper-handle-br" data-handle="br"></view>
+        </view>
+      </view>
+      <view class="cropper-hint-row">
+        <text class="cropper-hint">拖动移动，捏合缩放，拖边调整</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Hidden canvas for image cropping -->
+  <canvas canvas-id="cropCanvas" class="crop-canvas"></canvas>
 </view>

@@ -1,29 +1,149 @@
-<view class="container splash-page" style="background: var(--bg);" data-theme="{{__theme}}">
-  <!-- 光晕背景 -->
-  <view class="splash-glow"></view>
-
-  <!-- 浮动叶片 -->
-  <view class="splash-leaf-wrap">
-    <view class="splash-leaf">
-      <image src="/images/sparkles.png" style="width: 48px; height: 48px; opacity: 0.6;" />
+<view class="container splash-page" style="background: var(--bg-warm-white);" data-theme="{{__theme}}" bindtap="onPageTap">
+  <!-- 主容器 -->
+  <view class="splash-main" style="transform: translateY({{logoOffset}}px); transition: transform 0.2s ease-out;">
+    
+    <!-- SVG 动画容器 -->
+    <view class="splash-svg-container" style="width: {{svgSize}}px; height: {{svgSize}}px;">
+      <svg class="splash-svg" width="{{svgSize}}" height="{{svgSize}}" viewBox="0 0 {{svgSize}} {{svgSize}}">
+        <defs>
+          <!-- 多色渐变 -->
+          <linearGradient id="multiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#FFF8F0"/>
+            <stop offset="20%" style="stop-color:#F5E1DA"/>
+            <stop offset="40%" style="stop-color:#C5D1DC"/>
+            <stop offset="60%" style="stop-color:#E8DFD0"/>
+            <stop offset="80%" style="stop-color:#D4E5D2"/>
+            <stop offset="100%" style="stop-color:#E0D4E8"/>
+          </linearGradient>
+          
+          <!-- 上装渐变 -->
+          <linearGradient id="topGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#C5D1DC"/>
+            <stop offset="100%" style="stop-color:#A8B8C8"/>
+          </linearGradient>
+          
+          <!-- 下装渐变 -->
+          <linearGradient id="bottomGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#E8DFD0"/>
+            <stop offset="100%" style="stop-color:#D4C8B8"/>
+          </linearGradient>
+        </defs>
+        
+        <!-- 虚线边框 -->
+        <path d="M 2 2 L {{svgSize-2}} 2 L {{svgSize-2}} {{svgSize-2}} L 2 {{svgSize-2}} Z" 
+              fill="none" stroke="#D4A574" stroke-width="1" stroke-dasharray="8 4" opacity="0.5"/>
+        
+        <!-- 缝线动画（阶段1） -->
+        <block wx:for="{{stitchLines}}" wx:key="index">
+          <path d="{{item.path}}" 
+                fill="none" 
+                stroke="{{phase >= 1 ? 'url(#multiGradient)' : '#C5D1DC'}}" 
+                stroke-width="1.5" 
+                stroke-dasharray="8 4"
+                stroke-dashoffset="{{300 - stitchProgress / 100 * 300}}"
+                stroke-linecap="round"
+                opacity="{{phase >= 1 ? 0.2 : 1}}"
+                style="transition: {{phase >= 1 ? 'opacity 0.6s ease-out' : 'none'}}"/>
+        </block>
+        
+        <!-- 服装主体（阶段2-3） -->
+        <g class="splash-cloth-group" style="transform: scale({{clothScale}}); transform-origin: {{svgSize/2}}px {{svgSize * 0.5}}px; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease-out; opacity: {{clothGroupOpacity}};">
+          <!-- 领口线条 -->
+          <path d="M {{center}} {{svgSize * 0.08}} C {{center}} {{svgSize * 0.02}}, {{center + svgSize * 0.04}} {{svgSize * 0.02}}, {{center + svgSize * 0.04}} {{svgSize * 0.06}} C {{center + svgSize * 0.04}} {{svgSize * 0.09}}, {{center + svgSize * 0.02}} {{svgSize * 0.1}}, {{center}} {{svgSize * 0.1}} L {{center}} {{svgSize * 0.16}}"
+                fill="none" stroke="#8B7355" stroke-width="2.5" stroke-linecap="round"
+                opacity="{{showNeckline ? 1 : 0}}" style="transition: opacity 0.3s ease-out"/>
+          
+          <!-- 衣领 -->
+          <path d="M {{center - svgSize * 0.22}} {{svgSize * 0.24}} Q {{center}} {{svgSize * 0.14}} {{center + svgSize * 0.22}} {{svgSize * 0.24}}"
+                fill="none" stroke="#8B7355" stroke-width="2.5" stroke-linecap="round"
+                opacity="{{showNeckline ? 1 : 0}}" style="transition: opacity 0.3s ease-out 0.05s"/>
+          
+          <!-- 上衣主体 -->
+          <path d="M {{center - svgSize * 0.16}} {{svgSize * 0.24}} L {{center + svgSize * 0.16}} {{svgSize * 0.24}} Q {{center + svgSize * 0.2}} {{svgSize * 0.24}} {{center + svgSize * 0.2}} {{svgSize * 0.28}} L {{center + svgSize * 0.2}} {{svgSize * 0.34}} Q {{center + svgSize * 0.2}} {{svgSize * 0.37}} {{center + svgSize * 0.16}} {{svgSize * 0.37}} L {{center + svgSize * 0.12}} {{svgSize * 0.37}} L {{center + svgSize * 0.12}} {{svgSize * 0.52}} Q {{center + svgSize * 0.12}} {{svgSize * 0.56}} {{center}} {{svgSize * 0.56}} L {{center}} {{svgSize * 0.56}} Q {{center - svgSize * 0.12}} {{svgSize * 0.56}} {{center - svgSize * 0.12}} {{svgSize * 0.52}} L {{center - svgSize * 0.12}} {{svgSize * 0.37}} L {{center - svgSize * 0.16}} {{svgSize * 0.37}} Q {{center - svgSize * 0.2}} {{svgSize * 0.37}} {{center - svgSize * 0.2}} {{svgSize * 0.34}} L {{center - svgSize * 0.2}} {{svgSize * 0.28}} Q {{center - svgSize * 0.2}} {{svgSize * 0.24}} {{center - svgSize * 0.16}} {{svgSize * 0.24}} Z"
+                fill="{{showBody ? 'url(#bottomGradient)' : 'none'}}" 
+                stroke="{{showBody ? '#1A2B4C' : 'none'}}" 
+                stroke-width="1.8" stroke-linejoin="round"
+                opacity="{{showBody ? 1 : 0}}" 
+                style="transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: {{center}}px {{svgSize * 0.55}}px"/>
+          
+          <!-- 腰带装饰 -->
+          <path d="M {{center - svgSize * 0.12}} {{svgSize * 0.55}} L {{center + svgSize * 0.12}} {{svgSize * 0.55}}"
+                fill="none" stroke="#D4A574" stroke-width="2"
+                opacity="{{showBody ? 0.8 : 0}}" style="transition: opacity 0.4s ease-out 0.2s"/>
+          
+          <!-- 裤子/裙子 -->
+          <path d="M {{center - svgSize * 0.12}} {{svgSize * 0.56}} L {{center + svgSize * 0.12}} {{svgSize * 0.56}} L {{center + svgSize * 0.18}} {{svgSize * 0.82}} Q {{center + svgSize * 0.19}} {{svgSize * 0.86}} {{center + svgSize * 0.14}} {{svgSize * 0.86}} L {{center - svgSize * 0.14}} {{svgSize * 0.86}} Q {{center - svgSize * 0.19}} {{svgSize * 0.86}} {{center - svgSize * 0.18}} {{svgSize * 0.82}} Z"
+                fill="{{showPants ? 'url(#topGradient)' : 'none'}}" 
+                stroke="{{showPants ? '#1A2B4C' : 'none'}}" 
+                stroke-width="1.8" stroke-linejoin="round"
+                opacity="{{showPants ? 1 : 0}}" 
+                style="transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); transform-origin: {{center}}px {{svgSize * 0.24}}px"/>
+          
+          <!-- 口袋装饰 -->
+          <path d="M {{center - svgSize * 0.05}} {{svgSize * 0.24}} Q {{center}} {{svgSize * 0.29}} {{center + svgSize * 0.05}} {{svgSize * 0.24}}"
+                fill="none" stroke="{{showPants ? '#1A2B4C' : 'none'}}" stroke-width="1.2"
+                opacity="{{showPants ? 0.6 : 0}}" style="transition: opacity 0.4s ease-out 0.1s"/>
+          
+          <!-- 口袋主体 -->
+          <path d="M {{center - svgSize * 0.06}} {{svgSize * 0.27}} Q {{center}} {{svgSize * 0.33}} {{center + svgSize * 0.06}} {{svgSize * 0.27}} L {{center + svgSize * 0.04}} {{svgSize * 0.42}} Q {{center}} {{svgSize * 0.45}} {{center - svgSize * 0.04}} {{svgSize * 0.42}} Z"
+                fill="{{showPocket ? '#F5E1DA' : 'none'}}" 
+                stroke="{{showPocket ? '#D4A574' : 'none'}}" 
+                stroke-width="1" stroke-dasharray="3 2"
+                opacity="{{showPocket ? 0.85 : 0}}" style="transition: all 0.4s ease-out"/>
+          
+          <!-- 口袋缝线 -->
+          <block wx:if="{{showPocket}}">
+            <path d="M {{center - svgSize * 0.18}} {{svgSize * 0.26}} L {{center - svgSize * 0.12}} {{svgSize * 0.26}}"
+                  fill="none" stroke="#D4A574" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"/>
+            <path d="M {{center + svgSize * 0.12}} {{svgSize * 0.26}} L {{center + svgSize * 0.18}} {{svgSize * 0.26}}"
+                  fill="none" stroke="#D4A574" stroke-width="1" stroke-dasharray="3 2" opacity="0.5"/>
+          </block>
+        </g>
+      </svg>
+      
+      <!-- 浮动布料碎片（阶段2开始） -->
+      <block wx:for="{{clothPieces}}" wx:key="index">
+        <view class="splash-cloth-piece" 
+              style="width: {{svgSize * item.w}}px; height: {{svgSize * item.h}}px; top: {{item.top}}; left: {{item.left}}; background-color: {{item.color}}; opacity: {{showClothPieces ? 0.85 : 0}}; transform: {{showClothPieces ? 'scale(1) rotate(' + item.rotate + 'deg)' : 'scale(0) rotate(0deg)'}}; clip-path: {{item.clip}}; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) {{item.delay}}ms; animation: {{showClothPieces ? item.float + ' ' + (3 + index * 0.3) + 's ease-in-out infinite' : 'none'}}"/>
+      </block>
     </view>
-    <view class="splash-ring"></view>
+    
+    <!-- 品牌名称（阶段2开始显示） -->
+    <view class="splash-brand" style="margin-top: 48px; opacity: {{showBrand ? 1 : 0}}; transform: translateY({{showBrand ? 0 : 10}}px); transition: all 0.3s ease-out;">
+      <block wx:if="{{showWelcomeText}}">
+        <text wx:for="{{welcomeChars}}" wx:key="index" class="splash-welcome-char" style="animation-delay: {{item.delay}}s; color: #000000;">{{item.char}}</text>
+      </block>
+      <block wx:else>
+        <text class="splash-char" style="animation-delay: 0.3s">衣</text>
+        <text class="splash-char" style="animation-delay: 0.48s">语</text>
+        <text class="splash-char" style="animation-delay: 0.66s">集</text>
+      </block>
+    </view>
   </view>
-
-  <!-- 品牌名 -->
-  <view class="splash-brand">
-    <text class="splash-char" style="animation-delay: 0.3s">衣</text>
-    <text class="splash-char" style="animation-delay: 0.48s">语</text>
-    <text class="splash-char" style="animation-delay: 0.66s">集</text>
+  
+  <!-- 进度条 -->
+  <view class="splash-progress" style="margin-top: 32px;">
+    <!-- 阶段提示文字 -->
+    <view class="splash-phase-text" style="height: 20px; overflow: hidden; position: relative; width: 100%; text-align: center;">
+      <text class="splash-phase-animate" style="animation: fadeInUp 0.3s ease-out forwards;">{{phaseText}}</text>
+    </view>
+    
+    <!-- 进度条本体 -->
+    <view class="splash-progress-bar" style="width: 200px; height: 4px; border-radius: 2px; background: #E5E0D8; overflow: hidden; margin-top: 12px;">
+      <view class="splash-progress-fill" 
+            style="height: 100%; border-radius: 2px; transition: all 0.1s ease-linear; width: {{progress}}%; background: {{isComplete ? '#4CAF50' : 'linear-gradient(90deg, #FF8C69, #D4A574)'}}"/>
+    </view>
+    
+    <!-- 百分比文字 -->
+    <text class="splash-percent" 
+          style="font-size: 12px; margin-top: 8px; color: {{isComplete ? '#4CAF50' : '#AAAAAA'}}; transition: color 0.3s;">
+      {{isComplete ? '欢迎进入衣语集' : '正在加载资源... ' + progressText + '%'}}
+    </text>
   </view>
-
-  <!-- 副标题 -->
-  <view class="splash-subtitle">你的智能穿搭助手</view>
-
-  <!-- 加载圆点 -->
-  <view class="splash-dots">
-    <view class="splash-dot" style="animation-delay: 0s"></view>
-    <view class="splash-dot" style="animation-delay: 0.2s"></view>
-    <view class="splash-dot" style="animation-delay: 0.4s"></view>
-  </view>
+  
+  <!-- 版本号 -->
+  <text class="splash-version" style="position: absolute; bottom: 32px; left: 0; right: 0; text-align: center; font-size: 11px; color: #CCCCCC;">v1.0.0</text>
+  
+  <!-- 提示文字 -->
+  <text class="splash-hint" style="position: absolute; top: 32px; right: 24px; font-size: 12px; color: #CCCCCC; opacity: {{isComplete ? 0 : 0.7}}; transition: opacity 0.3s;">点击任意处跳过</text>
 </view>

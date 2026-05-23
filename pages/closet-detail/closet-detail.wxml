@@ -15,36 +15,76 @@
     <text bindtap="goBack" style="color: var(--accent); font-size: 13px; margin-top: 8px;">返回衣柜列表</text>
   </view>
   <view wx:else>
-    <view class="mx-4 mt-4">
-      <view class="add-btn" bindtap="showAddZone">
-        <text style="color: var(--accent); font-size: 18px; margin-right: 6px;">+</text>
-        <text class="text-body" style="color: var(--accent); font-weight: 500;">添加分区</text>
-      </view>
-    </view>
-    <view wx:if="{{wardrobe.zones.length === 0}}" class="empty-state">
-      <view class="empty-state-icon">
-        <image src="/images/grid.png" class="empty-state-img" style="filter: var(--icon-filter-accent);" />
-      </view>
-      <text class="empty-state-title">还没有分区</text>
-      <text class="empty-state-desc">点击上方按钮添加分区</text>
-    </view>
-    <view wx:else class="mx-4 mt-4">
-      <view wx:for="{{wardrobe.zones}}" wx:key="id" class="card zone-item mb-3 relative" bindtap="goToZone" data-zoneid="{{item.id}}">
-        <view class="flex items-center gap-3">
-          <view class="zone-icon-box">
-            <image src="/images/grid.png" class="zone-icon" style="filter: var(--icon-filter-accent);" />
+    <!-- 未分区衣柜：直接显示衣物列表 -->
+    <block wx:if="{{wardrobeId === 'unassigned'}}">
+      <view class="mx-4 mt-4">
+        <view wx:if="{{unassignedItems.length === 0}}" class="empty-state">
+          <view class="empty-state-icon">
+            <image src="/images/shirt.png" class="empty-state-img" style="filter: var(--icon-filter-accent);" />
           </view>
-          <view class="flex-1">
-            <text class="text-body font-medium block">{{item.name}}</text>
-            <text class="text-caption" style="color: var(--text-muted);">{{item.type}} · {{item.itemCount}}件</text>
-          </view>
-          <text style="color: var(--text-muted); font-size: 16px;">›</text>
+          <text class="empty-state-title">还没有衣物</text>
+          <text class="empty-state-desc">去「衣物」页面添加衣物</text>
         </view>
-        <view class="delete-zone" catchtap="deleteZone" data-id="{{item.id}}">
-          <text style="color: #C17C74; font-size: 12px;">删除</text>
+        <view wx:else>
+          <view class="section-header">
+            <view class="section-dot"></view>
+            <text class="section-title">所有衣物</text>
+            <text class="section-count">({{unassignedItems.length}} 件)</text>
+          </view>
+          <view class="masonry mt-3">
+            <view class="masonry-col">
+              <view wx:for="{{masonryLeft}}" wx:key="id" class="masonry-item" bindlongpress="showItemDetail" data-id="{{item.id}}">
+                <image class="masonry-img" src="{{item.image}}" mode="widthFix" />
+                <view class="p-2">
+                  <text class="text-12px font-medium block truncate">{{item.name}}</text>
+                  <text class="text-10px" style="color: var(--text-muted);">{{item.category}} · {{item.style}}</text>
+                </view>
+              </view>
+            </view>
+            <view class="masonry-col">
+              <view wx:for="{{masonryRight}}" wx:key="id" class="masonry-item" bindlongpress="showItemDetail" data-id="{{item.id}}">
+                <image class="masonry-img" src="{{item.image}}" mode="widthFix" />
+                <view class="p-2">
+                  <text class="text-12px font-medium block truncate">{{item.name}}</text>
+                  <text class="text-10px" style="color: var(--text-muted);">{{item.category}} · {{item.style}}</text>
+                </view>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
-    </view>
+    </block>
+
+    <!-- 普通衣柜：显示分区列表 -->
+    <block wx:else>
+      <view class="mx-4 mt-4">
+        <view class="add-btn" bindtap="showAddZone">
+          <text style="color: var(--accent); font-size: 18px; margin-right: 6px;">+</text>
+          <text class="text-body" style="color: var(--accent); font-weight: 500;">添加分区</text>
+        </view>
+      </view>
+      <view wx:if="{{wardrobe.zones.length === 0}}" class="empty-state">
+        <view class="empty-state-icon">
+          <image src="/images/grid.png" class="empty-state-img" style="filter: var(--icon-filter-accent);" />
+        </view>
+        <text class="empty-state-title">还没有分区</text>
+        <text class="empty-state-desc">点击上方按钮添加分区</text>
+      </view>
+      <view wx:else class="mx-4 mt-4">
+        <view wx:for="{{wardrobe.zones}}" wx:key="id" class="card zone-item mb-3" bindtap="goToZone" data-zoneid="{{item.id}}" bindlongpress="onZoneLongPress" data-zone-id="{{item.id}}" data-zone-name="{{item.name}}">
+          <view class="flex items-center gap-3">
+            <view class="zone-icon-box">
+              <image src="/images/grid.png" class="zone-icon" style="filter: var(--icon-filter-accent);" />
+            </view>
+            <view class="flex-1">
+              <text class="text-body font-medium block">{{item.name}}</text>
+              <text class="text-caption" style="color: var(--text-muted);">{{item.type}} · {{item.itemCount}}件</text>
+            </view>
+            <text style="color: var(--text-muted); font-size: 16px;">›</text>
+          </view>
+        </view>
+      </view>
+    </block>
   </view>
   <view wx:if="{{showAddZone}}" class="overlay flex items-end justify-center" catchtouchmove="prevent">
     <view class="bottom-sheet w-full">
@@ -74,6 +114,77 @@
         </view>
       </view>
       <button class="btn-confirm w-full" bindtap="confirmAddZone">确认添加</button>
+    </view>
+  </view>
+
+  <!-- Edit Zone Name Dialog -->
+  <view wx:if="{{showEditZoneDialog}}" class="overlay flex items-end justify-center" catchtouchmove="prevent">
+    <view class="bottom-sheet w-full">
+      <view class="flex items-center justify-between mb-4">
+        <text class="text-heading">编辑分区名称</text>
+        <view bindtap="hideEditZoneDialog" class="w-7 h-7 rounded-full flex items-center justify-center" style="background: var(--card-bg); box-shadow: 3px 3px 8px var(--shadow-dark);">
+          <text style="color: var(--text-muted); font-size: 14px;">×</text>
+        </view>
+      </view>
+      <input class="form-input mb-4" value="{{editZoneNameValue}}" bindinput="onEditZoneNameInput" placeholder="请输入新名称" />
+      <button class="btn-confirm w-full" bindtap="confirmEditZoneName">确认修改</button>
+    </view>
+  </view>
+
+  <!-- Item Detail Bottom Sheet -->
+  <view wx:if="{{showItemDetailSheet}}" class="bs-overlay-item" bindtap="hideItemDetail">
+    <view class="bs-sheet bs-sheet-item {{showItemDetailSheet ? 'bs-sheet-visible' : ''}}" catchtap="preventBubble">
+      <view class="bs-header">
+        <view bindtap="hideItemDetail" class="bs-header-btn">
+          <text class="bs-header-btn-icon">✕</text>
+        </view>
+      </view>
+      <scroll-view class="bs-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+        <view class="bs-photo-wrap" wx:if="{{detailItem}}">
+          <view class="bs-photo-carousel">
+            <image class="bs-photo-img" src="{{detailItem.image}}" mode="aspectFill" />
+          </view>
+        </view>
+        <view class="bs-info-area" wx:if="{{detailItem}}">
+          <text class="bs-title">{{detailItem.name}}</text>
+          <text class="bs-desc">{{detailItem.category}} · {{detailItem.subCategory || detailItem.subcategory || ''}} · {{detailItem.style}}</text>
+        </view>
+        <view class="bs-tags-area" wx:if="{{detailItem}}">
+          <view class="bs-tag-pill" wx:for="{{detailItem.seasons}}" wx:key="*this">
+            <text class="bs-tag-text">{{item}}</text>
+          </view>
+        </view>
+        <view class="bs-colors-area" wx:if="{{detailItem && detailItem.colors}}">
+          <text class="bs-colors-label">颜色</text>
+          <view class="bs-colors-row">
+            <view wx:for="{{detailItem.colors}}" wx:key="*this" class="bs-color-dot" style="background: {{item}};"></view>
+          </view>
+        </view>
+        <view class="bs-location-area" wx:if="{{detailItem}}">
+          <view class="bs-location-label-text">位置信息</view>
+          <view class="bs-location-pills">
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">衣柜</text>
+              <text class="bs-location-pill-value">{{detailWardrobeName}}</text>
+            </view>
+            <view class="bs-location-pill">
+              <text class="bs-location-pill-label">分区</text>
+              <text class="bs-location-pill-value">{{detailZoneName}}</text>
+            </view>
+          </view>
+        </view>
+        <view style="height: 20px;"></view>
+      </scroll-view>
+      <view class="bs-action-bar">
+        <view class="bs-edit-btn" bindtap="editItemDetail">
+          <text class="bs-edit-icon">✎</text>
+          <text class="bs-edit-text">编辑</text>
+        </view>
+        <view class="bs-delete-btn" bindtap="deleteItemDetail">
+          <text class="bs-delete-icon">🗑</text>
+          <text class="bs-delete-text">删除</text>
+        </view>
+      </view>
     </view>
   </view>
 </view>
